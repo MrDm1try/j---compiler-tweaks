@@ -7,6 +7,9 @@
 // Single line comment -- ignored
 "//" {~("\n"|"\r")} ("\n"|"\r"["\n"])
 
+// Multi-line comment -- ignored
+"/*" {~("*/")} "*/"
+
 // Reserved words
 ABSTRACT    ::= "abstract"
 BOOLEAN     ::= "boolean"
@@ -45,6 +48,15 @@ MINUS       ::= "-"
 PLUS        ::= "+"
 PLUS_ASSIGN ::= "+="
 STAR        ::= "*"
+DIV			::= "/"
+REM			::= "%"
+AND			::= "&"
+XOR			::= "^"
+OR			::= "|"
+LSHIFT		::= "<<"
+RSHIFT		::= ">>"
+LRSHIFT		::= ">>>"
+NOT			::= "~"
 
 // Separators
 COMMA       ::= ","

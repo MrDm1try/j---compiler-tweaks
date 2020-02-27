@@ -342,3 +342,54 @@ class JPreIncrementOp extends JUnaryExpression {
     }
 
 }
+
+/**
+ * The AST node for a unary complement (~) expression.
+ */
+
+class JNotOp extends JUnaryExpression {
+    public JNotOp(int line, JExpression arg) {
+        super(line, "~", arg);
+    }
+    
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+        output.addNoArgInstruction(ICONST_0);
+        output.addNoArgInstruction(SWAP);
+        output.addNoArgInstruction(ISUB);
+        output.addNoArgInstruction(ICONST_1);
+        output.addNoArgInstruction(ISUB);
+    }
+
+}
+
+
+/**
+ * The AST node for a unary plus (+) expression.
+ */
+
+class JUnaryPlusOp extends JUnaryExpression {
+    public JUnaryPlusOp(int line, JExpression arg) {
+        super(line, "+", arg);
+    }
+    
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+        output.addNoArgInstruction(NOP);
+    }
+
+}

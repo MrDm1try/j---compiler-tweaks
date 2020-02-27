@@ -1,0 +1,7 @@
+classes/
+compiledClasses/
+outputfolder/
+java2html/
+javadoc/
+.externalToolBuilders/Ant.launch
+*.jar

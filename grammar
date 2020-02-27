@@ -72,27 +72,41 @@ expression ::= assignmentExpression
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
 
-conditionalAndExpression ::= equalityExpression // level 10
-                               {LAND equalityExpression}
+conditionalAndExpression ::= bitwiseExpressionFour // level 10
+                               {LAND bitwiseExpressionFour}                               
+                               
+bitwiseExpressionFour ::= bitwiseExpressionThree		// level 9
+						{OR bitwiseExpressionThree}
+
+bitwiseExpressionThree ::= bitwiseExpressionTwo		// level 8
+						{XOR bitwiseExpressionTwo}
+
+bitwiseExpressionTwo ::= equalityExpression		// level 7
+						{AND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
 
-relationalExpression ::= additiveExpression       // level 5
-                           [(GT | LE) additiveExpression
+relationalExpression ::= bitwiseExpressionOne       // level 5
+                           [(GT | LE) bitwiseExpressionOne
                            | INSTANCEOF referenceType]
+                           
+bitwiseExpressionOne ::= additiveExpression		// level 4
+						{(LSHIFT | RSHIFT | LRSHIFT) additiveExpression}
 
 additiveExpression ::= multiplicativeExpression // level 3
                          {(PLUS | MINUS) multiplicativeExpression}
-
-multiplicativeExpression ::= unaryExpression       // level 2
-                               {STAR unaryExpression}
-
+                               
+multiplicativeExpression ::= unaryExpression // level 2
+								{(STAR | DIV | REM) unaryExpression }
+								
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
+		                | PLUS unaryExpression
+		                | NOT unaryExpression
                         | LPAREN basicType RPAREN unaryExpression //casted
                         | LPAREN // casted               
                             referenceType
