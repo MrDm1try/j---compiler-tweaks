@@ -133,15 +133,21 @@ class Scanner {
                         nextCh();
                     }
                 } else if (ch == '*') {
+                	nextCh();
                 	// Multi-line comment
+                	char lastCh = '-';
                 	while (ch != EOFCH) {
                 		nextCh();
                 		
-                		if (ch == '*') {
-                			nextCh();
-                			if (ch == '/') {
+                		if (ch == '\n') {
+                			lastCh = '-';
+                		} else {
+                			if (lastCh == '*' && ch == '/') {
+                				nextCh();
                 				break;
                 			}
+                			
+                			lastCh = ch;
                 		}
                 	}
                 } else {
