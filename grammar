@@ -60,7 +60,7 @@ arguments ::= LPAREN [expression {COMMA expression}] RPAREN
 
 type ::= referenceType | basicType
 
-basicType ::= BOOLEAN | CHAR | INT 
+basicType ::= BOOLEAN | CHAR | INT | BYTE | DOUBLE | FLOAT | LONG | SHORT
 
 referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
@@ -70,10 +70,10 @@ statementExpression ::= expression // but must have side-effect, eg i++
 expression ::= assignmentExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
+                           [(ASSIGN | LNOT_ASSIGN | MINUS_ASSIGN |  PLUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
 
 conditionalAndExpression ::= bitwiseExpressionFour // level 10
-                               {LAND bitwiseExpressionFour}                               
+                               {LAND | LOR bitwiseExpressionFour}                               
                                
 bitwiseExpressionFour ::= bitwiseExpressionThree		// level 9
 						{OR bitwiseExpressionThree}
@@ -88,7 +88,7 @@ equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
 
 relationalExpression ::= bitwiseExpressionOne       // level 5
-                           [(GT | LE) bitwiseExpressionOne
+                           [(GT | LS | GE | LE) bitwiseExpressionOne
                            | INSTANCEOF referenceType]
                            
 bitwiseExpressionOne ::= additiveExpression		// level 4
@@ -101,6 +101,9 @@ multiplicativeExpression ::= unaryExpression // level 2
 								{(STAR | DIV | REM) unaryExpression }
 								
 unaryExpression ::= INC unaryExpression  // level 1
+				  | unaryExpression INC
+				  | DEC unaryExpression
+				  | unaryExpression DEC
                   | MINUS unaryExpression
                   | simpleUnaryExpression
 
