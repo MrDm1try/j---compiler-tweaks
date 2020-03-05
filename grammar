@@ -13,16 +13,29 @@ modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
                        [EXTENDS qualifiedIdentifier] 
+                       [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
                        classBody
 
-classBody ::= LCURLY {modifiers memberDecl} RCURLY
+interfaceDeclaration ::= INTERFACE IDENTIFIER 
+                       [EXTENDS qualifiedIdentifier] 
+                       interfaceBody
 
-memberDecl ::= IDENTIFIER            // constructor
+classBody ::= LCURLY {modifiers classMemberDecl} RCURLY
+
+interfaceBody ::= LCURLY {modifiers interfaceMemberDecl} RCURLY
+
+classMemberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
                  (block | SEMI)
              | type variableDeclarators SEMI // field
+             | block // initializing field
+
+interfaceMemberDecl ::=  (VOID | type) IDENTIFIER  // method
+							 formalParameters
+							 SEMI
+                 | type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
@@ -32,6 +45,7 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
+            | DO statement WHILE parExpression SEMI
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
@@ -67,7 +81,9 @@ referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
-expression ::= assignmentExpression
+expression ::= assignmentExpression | ternaryExpression
+
+ternaryExpression ::= 
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | LNOT_ASSIGN | MINUS_ASSIGN |  PLUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
@@ -101,9 +117,7 @@ multiplicativeExpression ::= unaryExpression // level 2
 								{(STAR | DIV | REM) unaryExpression }
 								
 unaryExpression ::= INC unaryExpression  // level 1
-				  | unaryExpression INC
 				  | DEC unaryExpression
-				  | unaryExpression DEC
                   | MINUS unaryExpression
                   | simpleUnaryExpression
 
@@ -116,7 +130,7 @@ simpleUnaryExpression ::= LNOT unaryExpression
                           RPAREN simpleUnaryExpression
                         | postfixExpression 
 
-postfixExpression ::= primary {selector} {DEC}
+postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
 
 selector ::= DOT qualifiedIdentifier [arguments]
            | LBRACK expression RBRACK
@@ -139,5 +153,5 @@ creator ::= (basicType | qualifiedIdentifier)
 newArrayDeclarator ::= LBRACK expression RBRACK 
                          {LBRACK expression RBRACK} {LBRACK RBRACK}
 
-literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
-          | TRUE        | FALSE        | NULL
+literal ::= INT_LITERAL | DOUBLE_LITERAL | CHAR_LITERAL | STRING_LITERAL
+          | TRUE        | FALSE          | NULL
