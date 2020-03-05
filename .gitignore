@@ -3,5 +3,6 @@ compiledClasses/
 outputfolder/
 java2html/
 javadoc/
+.settings/
 .externalToolBuilders/Ant.launch
 *.jar
