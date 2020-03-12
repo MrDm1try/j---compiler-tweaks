@@ -379,8 +379,8 @@ class Scanner {
 					nextCh();
 				}
 				
-				if (ch == 'e') {
-					buffer.append(ch);
+				if (ch == 'e' || ch == 'e') {
+					buffer.append('e');
 					nextCh();
 					
 					if (ch == '-' || ch == '+') {
@@ -398,15 +398,14 @@ class Scanner {
 					}
 				} 
 				
-				if (ch == 'f' || ch == 'd') {
-					// todo: should we skip?
-					//buffer.append(ch);
+				if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+					// Skip
 					nextCh();
 				}
 				return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);				
 			} else {
-				if (ch == 'L') {
-					// todo: should we skip?
+				if (ch == 'l' || ch == 'L') {
+					// Skip
 					nextCh();
 				}
 				return new TokenInfo(INT_LITERAL, "0", line);
@@ -440,17 +439,17 @@ class Scanner {
 			} else {
 				kind = INT_LITERAL;
 				
-				if (ch == 'L') {
-					// todo: should we skip?
+				if (ch == 'l' || ch == 'L') {
+					// Skip
 					nextCh();
 				}
 			}
 			
-			if (ch == 'e') {
+			if (ch == 'e' || ch == 'E') {
 				// Override
 				kind = DOUBLE_LITERAL;
 				
-				buffer.append(ch);
+				buffer.append('e');
 				nextCh();
 				
 				if (ch == '-' || ch == '+') {
@@ -468,9 +467,8 @@ class Scanner {
 				}
 			}
 			
-			if (ch == 'f' || ch == 'd') {
-				// todo: should we skip?
-				//buffer.append(ch);
+			if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+				// Skip
 				nextCh();
 			}
 			

@@ -97,6 +97,8 @@ class JPlusOp extends JBinaryExpression {
 		rhs = (JExpression) rhs.analyze(context);
 		if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
 			return (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
+		} else if (lhs.type() == Type.DOUBLE || rhs.type() == Type.DOUBLE) {
+			type = Type.DOUBLE;
 		} else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
 			type = Type.INT;
 		} else {
@@ -157,9 +159,13 @@ class JSubtractOp extends JBinaryExpression {
 	public JExpression analyze(Context context) {
 		lhs = (JExpression) lhs.analyze(context);
 		rhs = (JExpression) rhs.analyze(context);
-		lhs.type().mustMatchExpected(line(), Type.INT);
-		rhs.type().mustMatchExpected(line(), Type.INT);
-		type = Type.INT;
+		lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		rhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		if (lhs.type() == Type.DOUBLE || rhs.type() == Type.DOUBLE) {
+			type = Type.DOUBLE;
+		} else {
+			type = Type.INT;
+		}
 		return this;
 	}
 
@@ -210,9 +216,13 @@ class JMultiplyOp extends JBinaryExpression {
 	public JExpression analyze(Context context) {
 		lhs = (JExpression) lhs.analyze(context);
 		rhs = (JExpression) rhs.analyze(context);
-		lhs.type().mustMatchExpected(line(), Type.INT);
-		rhs.type().mustMatchExpected(line(), Type.INT);
-		type = Type.INT;
+		lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		rhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		if (lhs.type() == Type.DOUBLE || rhs.type() == Type.DOUBLE) {
+			type = Type.DOUBLE;
+		} else {
+			type = Type.INT;
+		}
 		return this;
 	}
 
@@ -244,9 +254,13 @@ class JDivideOp extends JBinaryExpression {
 	public JExpression analyze(Context context) {
 		lhs = (JExpression) lhs.analyze(context);
 		rhs = (JExpression) rhs.analyze(context);
-		lhs.type().mustMatchExpected(line(), Type.INT);
-		rhs.type().mustMatchExpected(line(), Type.INT);
-		type = Type.INT;
+		lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		rhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		if (lhs.type() == Type.DOUBLE || rhs.type() == Type.DOUBLE) {
+			type = Type.DOUBLE;
+		} else {
+			type = Type.INT;
+		}
 		return this;
 	}
 
@@ -269,9 +283,13 @@ class JRemOp extends JBinaryExpression {
 	public JExpression analyze(Context context) {
 		lhs = (JExpression) lhs.analyze(context);
 		rhs = (JExpression) rhs.analyze(context);
-		lhs.type().mustMatchExpected(line(), Type.INT);
-		rhs.type().mustMatchExpected(line(), Type.INT);
-		type = Type.INT;
+		lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		rhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+		if (lhs.type() == Type.DOUBLE || rhs.type() == Type.DOUBLE) {
+			type = Type.DOUBLE;
+		} else {
+			type = Type.INT;
+		}
 		return this;
 	}
 
