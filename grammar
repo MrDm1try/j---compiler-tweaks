@@ -86,7 +86,7 @@ expression ::= assignmentExpression | ternaryExpression
 ternaryExpression ::= 
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | LNOT_ASSIGN | MINUS_ASSIGN |  PLUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
+                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | LNOT_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
 
 conditionalAndExpression ::= bitwiseExpressionFour // level 10
                                {LAND | LOR bitwiseExpressionFour}                               
