@@ -532,7 +532,11 @@ public class Parser {
 	private JMember memberDecl(ArrayList<String> mods) {
 		int line = scanner.token().line();
 		JMember memberDecl = null;
-		if (seeIdentLParen()) {
+		if (see(LCURLY)) {
+			// A block
+			JBlock body = block();
+			memberDecl = new JInitializationBlockDeclaration(line, mods, null, null, body);
+		} else if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
@@ -972,6 +976,10 @@ public class Parser {
 	 *       conditionalAndExpression // level 13
 	 *           [( ASSIGN  // conditionalExpression
 	 *            | PLUS_ASSIGN // must be valid lhs
+	 *            | MINUS_ASSIGN // must be valid lhs
+	 *            | STAR_ASSIGN // must be valid lhs
+	 *            | DIV_ASSIGN // must be valid lhs
+	 *            | REM_ASSIGN // must be valid lhs
 	 *            )
 	 *            assignmentExpression]
 	 * </pre>
@@ -986,6 +994,14 @@ public class Parser {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
 			return new JPlusAssignOp(line, lhs, assignmentExpression());
+		} else if (have(MINUS_ASSIGN)) {
+			return new JMinusAssignOp(line, lhs, assignmentExpression());
+		} else if (have(STAR_ASSIGN)) {
+			return new JStarAssignOp(line, lhs, assignmentExpression());
+		} else if (have(DIV_ASSIGN)) {
+			return new JDivAssignOp(line, lhs, assignmentExpression());
+		} else if (have(REM_ASSIGN)) {
+			return new JRemAssignOp(line, lhs, assignmentExpression());
 		} else {
 			return lhs;
 		}
@@ -996,7 +1012,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   conditionalAndExpression ::= bitwiseExpressionFour // level 10
-	 *                                  {LAND equalityExpression}
+	 *                                  {LAND | LOR equalityExpression}
 	 * </pre>
 	 * 
 	 * @return an AST for a conditionalExpression.
@@ -1009,6 +1025,9 @@ public class Parser {
 		while (more) {
 			if (have(LAND)) {
 				lhs = new JLogicalAndOp(line, lhs, bitwiseExpressionFour());
+			}
+			else if (have(LOR)) {
+				lhs = new JLogicalOrOp(line, lhs, bitwiseExpressionFour());
 			} else {
 				more = false;
 			}
@@ -1232,6 +1251,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   unaryExpression ::= INC unaryExpression // level 1
+	 *                     | DEC unaryExpression
 	 *                     | MINUS unaryExpression
 	 *                     | simpleUnaryExpression
 	 * </pre>
@@ -1243,6 +1263,8 @@ public class Parser {
 		int line = scanner.token().line();
 		if (have(INC)) {
 			return new JPreIncrementOp(line, unaryExpression());
+		} else if (have(DEC)) {
+			return new JPreDecrementOp(line, unaryExpression());
 		} else if (have(MINUS)) {
 			return new JNegateOp(line, unaryExpression());
 		} else {
@@ -1291,7 +1313,7 @@ public class Parser {
 	 * Parse a postfix expression.
 	 * 
 	 * <pre>
-	 *   postfixExpression ::= primary {selector} {DEC}
+     *   postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
 	 * </pre>
 	 * 
 	 * @return an AST for a postfixExpression.
@@ -1302,6 +1324,9 @@ public class Parser {
 		JExpression primaryExpr = primary();
 		while (see(DOT) || see(LBRACK)) {
 			primaryExpr = selector(primaryExpr);
+		}
+		while (have(INC)) {
+			primaryExpr = new JPostIncrementOp(line, primaryExpr);
 		}
 		while (have(DEC)) {
 			primaryExpr = new JPostDecrementOp(line, primaryExpr);
