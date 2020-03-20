@@ -81,9 +81,9 @@ referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
-expression ::= assignmentExpression | ternaryExpression
+expression ::= assignmentExpression | conditionalExpression
 
-ternaryExpression ::= 
+conditionalExpression ::= assignmentExpression TERN assignmentExpression COLON assignmentExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | LNOT_ASSIGN | MINUS_ASSIGN |  PLUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]

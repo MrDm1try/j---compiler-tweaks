@@ -18,7 +18,7 @@ enum TokenKind {
 	NULL("null"), PACKAGE("package"), PRIVATE("private"), PROTECTED("protected"), PUBLIC("public"), RETURN("return"),
 	SHORT("short"), STATIC("static"), STRICTFP("strictfp"), SUPER("super"), SWITCH("switch"), SYNCRONIZED("synchronized"), THIS("this"), 
 	THROW("throw"), THROWS("throws"), TRANSIENT("transient"), TRY("try"), TRUE("true"), VOID("void"), VOLATILE("volatile"), WHILE("while"), 
-	QM("?"), PLUS("+"),	ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), LT("<"), INC("++"), LAND("&&"),
+	TERN("?"), PLUS("+"),	ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), LT("<"), INC("++"), LAND("&&"),
 	LE("<="), GE(">="),	LNOT("!"), LNOT_EQUAL("!="), MINUS("-"), PLUS_ASSIGN("+="), MINUS_ASSIGN("-="),
 	STAR("*"), STAR_ASSIGN("*="), DIV("/"),	DIV_ASSIGN("/="), REM("%"), REM_ASSIGN("%="), AND("&"),
 	AND_ASSIGN("&="), XOR("^"),	XOR_ASSIGN("^="), OR("|"), OR_ASSIGN("|="),	LOR("||"),

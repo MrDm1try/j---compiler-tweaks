@@ -366,7 +366,7 @@ class Scanner {
 			return new TokenInfo(COLON, line);
 		case '?':
 			nextCh();
-			return new TokenInfo(QM, line);
+			return new TokenInfo(TERN, line);
 		case EOFCH:
 			return new TokenInfo(EOF, line);
 		case '0':

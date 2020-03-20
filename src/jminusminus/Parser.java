@@ -945,14 +945,23 @@ public class Parser {
 	 * An expression.
 	 * 
 	 * <pre>
-	 *   expression ::= assignmentExpression
+	 *   expression ::= expression TERN expression COLON expression | assignmentExpression
 	 * </pre>
 	 * 
 	 * @return an AST for an expression.
 	 */
 
 	private JExpression expression() {
-		return assignmentExpression();
+		int line = scanner.token().line();
+		JExpression lhs = assignmentExpression();
+		
+		if (have(TERN)) {
+			JExpression opt1 = assignmentExpression();
+			mustBe(COLON);			
+			return new JConditionalExpression(line, lhs, opt1, assignmentExpression());
+		} else {
+			return lhs;
+		}
 	}
 
 	/**
