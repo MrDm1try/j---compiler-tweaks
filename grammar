@@ -46,6 +46,7 @@ statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
             | DO statement WHILE parExpression SEMI
+            | FOR parExpression statement
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI

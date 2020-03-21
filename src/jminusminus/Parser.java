@@ -618,7 +618,9 @@ public class Parser {
 	 * <pre>
 	 *   statement ::= block
 	 *               | IF parExpression statement [ELSE statement]
-	 *               | WHILE parExpression statement 
+	 *               | WHILE parExpression statement
+	 				 | DO statement WHILE parExpression SEMI
+            		 | FOR parExpression statement 
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
@@ -640,6 +642,10 @@ public class Parser {
 			JExpression test = parExpression();
 			JStatement statement = statement();
 			return new JWhileStatement(line, test, statement);
+		} else if (have(FOR)) {
+			JExpression test = parExpression();
+			JStatement statement = statement();
+			return new JForStatement(line, test, statement);
 		} else if (have(RETURN)) {
 			if (have(SEMI)) {
 				return new JReturnStatement(line, null);
