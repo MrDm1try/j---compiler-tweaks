@@ -258,6 +258,41 @@ public class Parser {
 	}
 
 	/**
+	 * Are we looking at a for each expression? i.e.
+	 * 
+	 * <pre>
+	 *   formalParameter COLON ...
+	 * </pre>
+	 * 
+	 * Look ahead to determine.
+	 * 
+	 * @return true iff we are looking at a for each expression; false otherwise.
+	 */
+
+	private boolean seeForEachExpression() {
+		scanner.recordPosition();
+		if (!haveReferenceType()) {
+			if (seeBasicType()) {
+				scanner.next();
+			} else {
+				scanner.returnToPosition();
+				return false;
+			}
+		}
+		if (!see(IDENTIFIER)) {
+			scanner.returnToPosition();
+			return false;
+		}
+		scanner.next();
+		if (!see(COLON)) {
+			scanner.returnToPosition();
+			return false;
+		}
+		scanner.returnToPosition();
+		return true;
+	}
+
+	/**
 	 * Are we looking at a basic type? ie.
 	 * 
 	 * <pre>
@@ -300,6 +335,33 @@ public class Parser {
 			scanner.returnToPosition();
 		}
 		return false;
+	}
+
+	/**
+	 * Are we looking at a reference type? Consume tokens if so.
+	 * 
+	 * @return true iff we're looking at a reference type; false otherwise.
+	 */
+
+	private boolean haveReferenceType() {
+		if (have(IDENTIFIER)) {
+			return true;
+		} else {
+			scanner.recordPosition();
+			if (have(BOOLEAN) || have(CHAR) || have(INT)) {
+				if (have(LBRACK) && have(RBRACK)) {
+					scanner.returnToPosition();
+					// We have to return to position to disable 'lookahead mode'
+					// not the most elegant
+					scanner.next();
+					scanner.next();
+					scanner.next();
+					return true;
+				}
+			}
+			scanner.returnToPosition();
+			return false;
+		}
 	}
 
 	/**
@@ -620,7 +682,7 @@ public class Parser {
 	 *               | IF parExpression statement [ELSE statement]
 	 *               | WHILE parExpression statement
 	 				 | DO statement WHILE parExpression SEMI
-            		 | FOR parExpression statement 
+	        		 | FOR forExpression statement 
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
@@ -643,9 +705,45 @@ public class Parser {
 			JStatement statement = statement();
 			return new JWhileStatement(line, test, statement);
 		} else if (have(FOR)) {
-			JExpression test = parExpression();
-			JStatement statement = statement();
-			return new JForStatement(line, test, statement);
+			JExpression initializer = null;
+			JVariableDeclarator varDecl = null;
+			JFormalParameter variable = null;
+			JExpression exp2 = null;
+			JExpression exp3 = null;
+			mustBe(LPAREN);
+			if (!have(SEMI)) {
+				if (seeForEachExpression()) {
+					variable = formalParameter();
+					mustBe(COLON);
+				} else if (seeLocalVariableDeclaration()) {
+					varDecl = variableDeclarator(type());
+					mustBe(SEMI);
+				} else {
+					initializer = expression();
+					mustBe(SEMI);
+				}
+
+			}
+			if (variable != null) {
+				exp2 = expression();
+			} else {
+				if (!have(SEMI)) {
+					exp2 = expression();
+					mustBe(SEMI);
+				}
+				if (!see(RPAREN)) {
+					exp3 = expression();
+				}
+			}
+			mustBe(RPAREN);
+			JStatement body = statement();
+			if (variable != null) {
+				return new JForEachStatement(line, variable, exp2, body);
+			} else if (varDecl != null) {
+				return new JForStatement(line, varDecl, exp2, exp3, body);
+			} else {
+				return new JForStatement(line, initializer, exp2, exp3, body);
+			}
 		} else if (have(RETURN)) {
 			if (have(SEMI)) {
 				return new JReturnStatement(line, null);
@@ -964,10 +1062,10 @@ public class Parser {
 	private JExpression expression() {
 		int line = scanner.token().line();
 		JExpression lhs = assignmentExpression();
-		
+
 		if (have(TERN)) {
 			JExpression opt1 = assignmentExpression();
-			mustBe(COLON);			
+			mustBe(COLON);
 			return new JConditionalExpression(line, lhs, opt1, assignmentExpression());
 		} else {
 			return lhs;
@@ -1031,8 +1129,7 @@ public class Parser {
 		while (more) {
 			if (have(LAND)) {
 				lhs = new JLogicalAndOp(line, lhs, bitwiseExpressionFour());
-			}
-			else if (have(LOR)) {
+			} else if (have(LOR)) {
 				lhs = new JLogicalOrOp(line, lhs, bitwiseExpressionFour());
 			} else {
 				more = false;
@@ -1319,7 +1416,7 @@ public class Parser {
 	 * Parse a postfix expression.
 	 * 
 	 * <pre>
-     *   postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
+	 *   postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
 	 * </pre>
 	 * 
 	 * @return an AST for a postfixExpression.

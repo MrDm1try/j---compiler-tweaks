@@ -11,7 +11,7 @@ import static jminusminus.CLConstants.*;
 class JForEachStatement extends JStatement {
 
     /** Loop variable. */
-    private JStatement variable;
+    private JFormalParameter variable;
 
     /** Statement with enumerated element (that goes for-each). */
     private JExpression enumeration;
@@ -31,7 +31,7 @@ class JForEachStatement extends JStatement {
      *            the body.
      */
 
-    public JForEachStatement(int line, JStatement variable, JExpression enumeration, JStatement body) {
+    public JForEachStatement(int line, JFormalParameter variable, JExpression enumeration, JStatement body) {
         super(line);
         this.variable = variable;
         this.enumeration = enumeration;
@@ -48,10 +48,10 @@ class JForEachStatement extends JStatement {
      */
 
     public JForEachStatement analyze(Context context) {
-        variable = variable.analyze(context);
+        variable = (JFormalParameter) variable.analyze(context);
         enumeration = enumeration.analyze(context);
 
-        body = body.analyze(context);
+        body = (JStatement) body.analyze(context);
         return this;
     }
 
@@ -92,14 +92,14 @@ class JForEachStatement extends JStatement {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
-        p.printf("<InitVariable>\n");
+        p.printf("<Variable>\n");
         p.indentRight();
-        condition.writeToStdOut(p);
+        variable.writeToStdOut(p);
         p.indentLeft();
-        p.printf("</InitVariable>\n");
+        p.printf("</Variable>\n");
         p.printf("<Enumeration>\n");
         p.indentRight();
-        condition.writeToStdOut(p);
+        enumeration.writeToStdOut(p);
         p.indentLeft();
         p.printf("</Enumeration>\n");
         p.printf("<Body>\n");
