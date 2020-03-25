@@ -2,7 +2,13 @@ interface A {
     public int f(int x);
 }
 
-public class B implements A {
+class B {
+	public String hi() {
+		return "hi";
+	}
+}
+
+public class C extends B implements A {
     public int f(int x) {
         return x * x;
     }
