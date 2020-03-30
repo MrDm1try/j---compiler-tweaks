@@ -45,7 +45,6 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
-            | DO statement WHILE parExpression SEMI
             | FOR forExpression statement
             | TRY statement {CATCH catchExpression statement} [FINALLY statement]
             | THROW expression SEMI
@@ -140,7 +139,7 @@ simpleUnaryExpression ::= LNOT unaryExpression
                           RPAREN simpleUnaryExpression
                         | postfixExpression 
 
-postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
+postfixExpression ::= primary {selector} {DEC|INC}
 
 selector ::= DOT qualifiedIdentifier [arguments]
            | LBRACK expression RBRACK

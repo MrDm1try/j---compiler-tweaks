@@ -687,7 +687,6 @@ public class Parser {
 	 *   statement ::= block
 	 *               | IF parExpression statement [ELSE statement]
 	 *               | WHILE parExpression statement
-	 				 | DO statement WHILE parExpression SEMI
 	        		 | FOR forExpression statement 
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 

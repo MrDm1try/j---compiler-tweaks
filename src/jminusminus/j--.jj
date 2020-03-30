@@ -159,6 +159,7 @@ TOKEN:
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
+| < FOR: "for" >
 | < IF: "if" >
 | < IMPORT: "import" >
 | < INSTANCEOF: "instanceof" >
@@ -205,6 +206,7 @@ TOKEN:
 | < LBRACK: "[" >
 | < RBRACK: "]" >
 | < SEMI: ";" >
+| < COLON: ":" >
 | < COMMA: "," >
 | < DOT: "." >
 }
@@ -654,6 +656,7 @@ private JStatement blockStatement(): {
  *   statement ::= block
  *               | IF parExpression statement [ELSE statement]
  *               | WHILE parExpression statement 
+ *           	 | FOR forExpression statement
  *               | RETURN [expression] SEMI
  *               | SEMI 
  *               | statementExpression SEMI
@@ -670,6 +673,12 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    Type type = null;
+	JExpression initializer = null;
+	JVariableDeclarator varDecl = null;
+	JFormalParameter variable = null;
+	JExpression exp2 = null;
+	JExpression exp3 = null;
 }
 {       
     try {
@@ -692,6 +701,47 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+        <FOR> { line = token.beginLine; }
+        // forExpression ::= LPAREN [[type] variableDeclarator] SEMI [expression] SEMI [expression] RPAREN
+		//				| LPAREN formalParameter COLON expression RPAREN
+		<LPAREN>
+		(
+			LOOKAHEAD( formalParameter() <COLON> )
+			(
+				variable = formalParameter()
+				<COLON>
+				exp2 = expression()
+			) |
+			(
+				( 
+					LOOKAHEAD( type() <IDENTIFIER> )
+					type = type()
+					varDecl = variableDeclarator(type) |
+					initializer = expression()
+				)
+				<SEMI>
+				[
+					LOOKAHEAD( expression() )
+					exp2 = expression()
+				]
+				<SEMI>
+				[
+					LOOKAHEAD( expression() )
+					exp3 = expression()
+				]
+			)
+		)
+		<RPAREN>
+        body = statement()
+        { 
+        	if (variable != null) {
+				statement = new JForEachStatement(line, variable, exp2, body);
+			} else if (varDecl != null) {
+				statement = new JForStatement(line, varDecl, exp2, exp3, body);
+			} else {
+				statement = new JForStatement(line, initializer, exp2, exp3, body);
+			}
+        } |
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
@@ -1418,7 +1468,7 @@ private JExpression simpleUnaryExpression(): {
  * Parse a postfix expression.
  * 
  * <pre>
- *   postfixExpression ::= primary {selector} {DEC}
+ *   postfixExpression ::= primary {selector} {DEC|INC}
  * </pre>
  * 
  * @return an AST for a postfixExpression.
@@ -1437,7 +1487,10 @@ private JExpression postfixExpression(): {
         ( 
             <DEC> 
             { primaryExpr = 
-                new JPostDecrementOp( line, primaryExpr ); } 
+                new JPostDecrementOp( line, primaryExpr ); } |
+            <INC>
+            { primaryExpr = 
+                new JPostIncrementOp( line, primaryExpr ); }
         )*
     } 
     catch ( ParseException e ) {
