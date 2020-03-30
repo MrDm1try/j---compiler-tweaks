@@ -1459,7 +1459,7 @@ public class Parser {
 	 * Parse a postfix expression.
 	 * 
 	 * <pre>
-	 *   postfixExpression ::= primary {selector} {DEC} | primary {selector} {INC}
+	 *   postfixExpression ::= primary {selector} {DEC | INC}
 	 * </pre>
 	 * 
 	 * @return an AST for a postfixExpression.

@@ -1193,18 +1193,29 @@ private JStatement statementExpression(): {
  * An expression.
  * 
  * <pre>
- *   expression ::= assignmentExpression 
+ *   expression ::= assignmentExpression | assignmentExpression TERN assignmentExpression COLON assignmentExpression
  * </pre>
  * 
  * @return an AST for an expression.
  */
 
 private JExpression expression(): {
-    JExpression expr = null;
+	int line = 0;
+    JExpression expr = null, branchTrue = null, branchFalse = null;
 }
 {
     try {
         expr = assignmentExpression()
+        [
+        	<TERN>
+        	branchTrue = assignmentExpression()
+        	<COLON>
+        	branchFalse = assignmentExpression()
+        	{
+        		line = expr.line();
+        	  	expr = new JConditionalExpression(line, expr, branchTrue, branchFalse); 
+        	}
+        ]
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
