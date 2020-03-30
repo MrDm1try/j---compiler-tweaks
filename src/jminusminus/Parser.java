@@ -561,7 +561,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   classBody ::= LCURLY
-	 *                   {modifiers memberDecl}
+	 *                   {modifiers classMemberDecl}
 	 *                 RCURLY
 	 * </pre>
 	 * 
@@ -572,17 +572,17 @@ public class Parser {
 		ArrayList<JMember> members = new ArrayList<JMember>();
 		mustBe(LCURLY);
 		while (!see(RCURLY) && !see(EOF)) {
-			members.add(memberDecl(modifiers()));
+			members.add(classMemberDecl(modifiers()));
 		}
 		mustBe(RCURLY);
 		return members;
 	}
 
 	/**
-	 * Parse a member declaration.
+	 * Parse a class member declaration.
 	 * 
 	 * <pre>
-	 *   memberDecl ::= IDENTIFIER            // constructor
+	 *   classMemberDecl ::= IDENTIFIER            // constructor
 	 *                    formalParameters
 	 *                    block
 	 *                | (VOID | type) IDENTIFIER  // method
@@ -595,7 +595,7 @@ public class Parser {
 	 * @return an AST for a memberDecl.
 	 */
 
-	private JMember memberDecl(ArrayList<String> mods) {
+	private JMember classMemberDecl(ArrayList<String> mods) {
 		int line = scanner.token().line();
 		JMember memberDecl = null;
 		if (see(LCURLY)) {
