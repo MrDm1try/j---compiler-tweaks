@@ -30,11 +30,10 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
      *            constructor body.
      */
 
-    public JInitializationBlockDeclaration(int line, ArrayList<String> mods,
-            String name, ArrayList<JFormalParameter> params, JBlock body)
+    public JInitializationBlockDeclaration(int line, ArrayList<String> mods, JBlock body)
 
     {
-        super(line, mods, name, Type.INITIALIZATION_BLOCK, params, body);
+        super(line, mods, null, Type.INITIALIZATION_BLOCK, null, body);
     }
 
     /**

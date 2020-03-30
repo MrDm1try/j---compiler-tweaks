@@ -601,7 +601,7 @@ public class Parser {
 		if (see(LCURLY)) {
 			// A block
 			JBlock body = block();
-			memberDecl = new JInitializationBlockDeclaration(line, mods, null, null, body);
+			memberDecl = new JInitializationBlockDeclaration(line, mods, body);
 		} else if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
