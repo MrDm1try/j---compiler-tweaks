@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+
 import static jminusminus.TokenKind.*;
 
 /**
@@ -549,6 +550,9 @@ public class Parser {
 		} else {
 			superClass = Type.OBJECT;
 		}
+		if (have(IMPLEMENTS)) {
+
+		}
 		return new JClassDeclaration(line, mods, name, superClass, classBody());
 	}
 
@@ -613,8 +617,9 @@ public class Parser {
 				mustBe(IDENTIFIER);
 				String name = scanner.previousToken().image();
 				ArrayList<JFormalParameter> params = formalParameters();
+				ArrayList<Type> throwTypes = throwTypes();
 				JBlock body = have(SEMI) ? null : block();
-				memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+				memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, body);
 			} else {
 				type = type();
 				if (seeIdentLParen()) {
@@ -622,8 +627,9 @@ public class Parser {
 					mustBe(IDENTIFIER);
 					String name = scanner.previousToken().image();
 					ArrayList<JFormalParameter> params = formalParameters();
+					ArrayList<Type> throwTypes = throwTypes();
 					JBlock body = have(SEMI) ? null : block();
-					memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+					memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, body);
 				} else {
 					// Field
 					memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
@@ -722,7 +728,6 @@ public class Parser {
 					initializer = expression();
 					mustBe(SEMI);
 				}
-
 			}
 			if (variable != null) {
 				exp2 = expression();
@@ -744,6 +749,25 @@ public class Parser {
 			} else {
 				return new JForStatement(line, initializer, exp2, exp3, body);
 			}
+		} else if (have(TRY)) {
+			JStatement tryBlock = statement();
+			ArrayList<JStatement> catchBlocks = new ArrayList<JStatement>();
+            ArrayList<JFormalParameter> exceptionsToCatch = new ArrayList<JFormalParameter>();
+			while (have(CATCH)) {
+				mustBe(LPAREN);
+				exceptionsToCatch.add(formalParameter());
+				mustBe(RPAREN);
+				catchBlocks.add(statement());
+			}
+			JStatement finallyBlock = null;
+			if (have(FINALLY)) {
+				finallyBlock = statement();
+			}
+			return new JTryCatchFinallyStatement(line, tryBlock, catchBlocks, exceptionsToCatch, finallyBlock);
+		} else if (have(THROW)) {
+			JExpression expr = expression();
+			mustBe(SEMI);
+			return new JThrowStatement(line, expr);
 		} else if (have(RETURN)) {
 			if (have(SEMI)) {
 				return new JReturnStatement(line, null);
@@ -802,6 +826,26 @@ public class Parser {
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		return new JFormalParameter(line, name, type);
+	}
+	
+	/**
+	 * Parse a (list of) thrown exception types
+	 * 
+	 * <pre>
+	 *   throwTypes ::= [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+	 * </pre>
+	 * 
+	 * @return a list of AST for throwTypes
+	 */
+	private ArrayList<Type> throwTypes() {
+		ArrayList<Type> throwTypes = new ArrayList<Type>();
+		if (have(THROWS)) {
+			throwTypes.add(qualifiedIdentifier());
+		}
+		while (have(COMMA)) {
+			throwTypes.add(qualifiedIdentifier());
+		}
+		return throwTypes;
 	}
 
 	/**
