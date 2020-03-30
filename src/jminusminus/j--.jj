@@ -182,18 +182,42 @@ TOKEN:
 // Operators (these could be combined with the reserved words)
 TOKEN:
 {
-  < PLUS: "+" >
-| < ASSIGN: "=" >
-| < DEC: "--" >
+  < ASSIGN: "=" >
 | < EQUAL: "==" >
 | < GT: ">" >
+| < LS: "<" >
 | < INC: "++" >
+| < DEC: "--" >
+| < LOR: "||" >
 | < LAND: "&&" >
+| < GE: ">=" >
 | < LE: "<=" >
 | < LNOT: "!" >
+| < LNOT_ASSIGN: "!=" >
 | < MINUS: "-" >
+| < MINUS_ASSIGN: "-=" >
+| < PLUS: "+" >
 | < PLUS_ASSIGN: "+=" >
 | < STAR: "*" >
+| < STAR_ASSIGN: "*=" >
+| < DIV: "/" >
+| < DIV_ASSIGN: "/=" >
+| < REM: "%" >
+| < REM_ASSIGN: "%=" >
+| < AND: "&" >
+| < AND_ASSIGN: "&=" >
+| < XOR: "^" >
+| < XOR_ASSIGN: "^=" >
+| < OR: "|" >
+| < OR_ASSIGN: "|=" >
+| < LSHIFT: "<<" >
+| < LSHIFT_ASSIGN: "<<=" >
+| < RSHIFT: ">>" >
+| < RSHIFT_ASSIGN: ">>=" >
+| < LRSHIFT: ">>>" >
+| < LRSHIFT_ASSIGN: ">>>=" >
+| < NOT: "~" >
+| < TERN: "?" >
 }
 
 // Separators (these could be combined with the reserved words)
