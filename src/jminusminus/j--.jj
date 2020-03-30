@@ -478,7 +478,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
+ *                   {modifiers classMemberDecl}
  *                 RCURLY
  * </pre>
  * 
@@ -495,7 +495,7 @@ private ArrayList<JMember> classBody(): {
         <LCURLY>
         ( 
             mods = modifiers()
-            aMember = memberDecl( mods ) { members.add( aMember ); } 
+            aMember = classMemberDecl( mods ) { members.add( aMember ); } 
         )*
         <RCURLY>
     } 
@@ -509,20 +509,21 @@ private ArrayList<JMember> classBody(): {
  * Parse a member declaration.
  * 
  * <pre>
- *   memberDecl ::= IDENTIFIER            // constructor
+ *   classMemberDecl ::= IDENTIFIER            // constructor
  *                    formalParameters
  *                    block
  *                | (VOID | type) IDENTIFIER  // method
  *                    formalParameters
  *                    (block | SEMI)
  *                | type variableDeclarators SEMI 
+ *  	          | block // initializing field
  * </pre>
  * 
  * @param mods the class member modifiers.
  * @return an AST for a memberDecl.
  */
     
-private JMember memberDecl( ArrayList<String>  mods ): {
+private JMember classMemberDecl( ArrayList<String>  mods ): {
     int line = 0;
     Type type = null;
     String name = "";
@@ -533,7 +534,14 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 }
 {
     try {
-        LOOKAHEAD( <IDENTIFIER> <LPAREN> )
+        LOOKAHEAD( <LCURLY> )
+        (
+            body = block()
+            { 
+                memberDecl = 
+                new JInitializationBlockDeclaration( line, mods, body );
+            }
+        ) | LOOKAHEAD( <IDENTIFIER> <LPAREN> )
         (
             <IDENTIFIER> 
             { 
