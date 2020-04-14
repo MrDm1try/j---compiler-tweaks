@@ -452,7 +452,11 @@ public class Parser {
 
 	private JAST typeDeclaration() {
 		ArrayList<String> mods = modifiers();
-		return classDeclaration(mods);
+		if (see(CLASS)) {
+			return classDeclaration(mods);
+		} else {
+			return interfaceDeclaration(mods);
+		}
 	}
 
 	/**
@@ -529,6 +533,7 @@ public class Parser {
 	 * <pre>
 	 *   classDeclaration ::= CLASS IDENTIFIER 
 	 *                        [EXTENDS qualifiedIdentifier] 
+     *		                  [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
 	 *                        classBody
 	 * </pre>
 	 * 
@@ -545,15 +550,44 @@ public class Parser {
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
+		ArrayList<Type> implementsTypes = new ArrayList<Type>();
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
 		if (have(IMPLEMENTS)) {
-
+			implementsTypes.add(qualifiedIdentifier());
+			while (have(COMMA)) {
+				implementsTypes.add(qualifiedIdentifier());
+			}
 		}
-		return new JClassDeclaration(line, mods, name, superClass, classBody());
+		return new JClassDeclaration(line, mods, name, superClass, implementsTypes, classBody());
+	}
+
+
+	/**
+	 * Parse an interface declaration.
+	 * 
+	 * <pre>
+	 *		interfaceDeclaration ::= INTERFACE IDENTIFIER 
+     *                  [EXTENDS qualifiedIdentifier] 
+     *                  interfaceBody
+	 * </pre>
+	 */
+
+	private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		mustBe(INTERFACE);
+		mustBe(IDENTIFIER);
+		String name = scanner.previousToken().image();
+		Type superClass;
+		if (have(EXTENDS)) {
+			superClass = qualifiedIdentifier();
+		} else {
+			superClass = Type.OBJECT;
+		}
+		return new JInterfaceDeclaration(line, mods, name, superClass, interfaceBody());
 	}
 
 	/**
@@ -573,6 +607,28 @@ public class Parser {
 		mustBe(LCURLY);
 		while (!see(RCURLY) && !see(EOF)) {
 			members.add(classMemberDecl(modifiers()));
+		}
+		mustBe(RCURLY);
+		return members;
+	}
+
+	/**
+	 * Parse an interface body.
+	 * 
+	 * <pre>
+	 *   classBody ::= LCURLY
+	 *                   {modifiers interfaceMemberDecl}
+	 *                 RCURLY
+	 * </pre>
+	 * 
+	 * @return list of members in the interface body.
+	 */
+
+	private ArrayList<JMember> interfaceBody() {
+		ArrayList<JMember> members = new ArrayList<JMember>();
+		mustBe(LCURLY);
+		while (!see(RCURLY) && !see(EOF)) {
+			members.add(interfaceMemberDecl(modifiers()));
 		}
 		mustBe(RCURLY);
 		return members;
@@ -635,6 +691,52 @@ public class Parser {
 					memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
 					mustBe(SEMI);
 				}
+			}
+		}
+		return memberDecl;
+	}
+
+	/**
+	 * Parse an interface member declaration.
+	 * 
+	 * <pre>
+	 *		interfaceMemberDecl ::=  (VOID | type) IDENTIFIER  // method
+	 *						 formalParameters throwTypes
+	 *						 SEMI
+     *            			| type variableDeclarators SEMI // field
+	 * </pre>
+	 * 
+	 * @param mods the class member modifiers.
+	 * @return an AST for a memberDecl.
+	 */
+
+	private JMember interfaceMemberDecl(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		JMember memberDecl = null;
+		Type type = null;
+		if (have(VOID)) {
+			// void method
+			type = Type.VOID;
+			mustBe(IDENTIFIER);
+			String name = scanner.previousToken().image();
+			ArrayList<JFormalParameter> params = formalParameters();
+			ArrayList<Type> throwTypes = throwTypes();
+			mustBe(SEMI);
+			memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, null);
+		} else {
+			type = type();
+			if (seeIdentLParen()) {
+				// Non void method
+				mustBe(IDENTIFIER);
+				String name = scanner.previousToken().image();
+				ArrayList<JFormalParameter> params = formalParameters();
+				ArrayList<Type> throwTypes = throwTypes();
+				mustBe(SEMI);
+				memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, null);
+			} else {
+				// Field
+				memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
+				mustBe(SEMI);
 			}
 		}
 		return memberDecl;

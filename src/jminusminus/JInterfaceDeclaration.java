@@ -24,9 +24,6 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** This class type. */
     private Type thisType;
 
-    /** extend */
-    private ArrayList<TypeName> extendList;
-
     /** Interface block. */
     private ArrayList<JMember> interfaceBlock;    
 
@@ -58,11 +55,11 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public JInterfaceDeclaration(int line, ArrayList<String> mods, String name,
-            ArrayList<TypeName> extendList, ArrayList<JMember> interfaceBlock) {
+            Type superType, ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
-        this.extendList = extendList;
+        this.superType = superType;
         this.interfaceBlock = interfaceBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -180,15 +177,6 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
             }
             p.indentLeft();
             p.println("</Modifiers>");
-        }
-        if (extendList != null) {
-            p.println("<Extends>");
-            p.indentRight();
-            for (TypeName ext : extendList) {
-                p.printf("<Extends name=\"%s\"/>\n", ext.toString());
-            }
-            p.indentLeft();
-            p.println("</Extends>");
         }
         if (interfaceBlock != null) {
             p.println("<InterfaceBlock>");

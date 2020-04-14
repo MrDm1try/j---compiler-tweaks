@@ -26,6 +26,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Super class type. */
     private Type superType;
 
+    /** Implements */
+    private ArrayList<Type> implementsTypes;
+
     /** This class type. */
     private Type thisType;
 
@@ -59,11 +62,12 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-            Type superType, ArrayList<JMember> classBlock) {
+            Type superType, ArrayList<Type> implementsTypes, ArrayList<JMember> classBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.superType = superType;
+        this.implementsTypes = implementsTypes;
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -277,6 +281,15 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
             p.indentLeft();
             p.println("</Modifiers>");
+        }
+        if (implementsTypes != null) {
+        	p.println("<ImplementsTypes>");
+            p.indentRight();
+        	for (Type implementsType : implementsTypes) {
+                p.printf("<ImplementsType name=\"%s\"/>\n", implementsType.toString());
+        	}
+            p.indentLeft();
+        	p.println("<ImplementsTypes>");
         }
         if (classBlock != null) {
             p.println("<ClassBlock>");
