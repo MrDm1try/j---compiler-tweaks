@@ -651,10 +651,10 @@ private ArrayList<JMember> interfaceBody(): {
  * 
  * <pre>
  *   classMemberDecl ::= IDENTIFIER            // constructor
- *                    formalParameters
+ *                    formalParameters throwTypes
  *                    block
  *                | (VOID | type) IDENTIFIER  // method
- *                    formalParameters
+ *                    formalParameters throwTypes
  *                    (block | SEMI)
  *                | type variableDeclarators SEMI 
  *  	          | block // initializing field
@@ -669,6 +669,7 @@ private JMember classMemberDecl( ArrayList<String>  mods ): {
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
+    ArrayList<Type> throwTypes = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
     JMember memberDecl = null;
@@ -689,12 +690,13 @@ private JMember classMemberDecl( ArrayList<String>  mods ): {
                 line = token.beginLine; 
                 name = token.image; 
             } 
-            params = formalParameters() 
+            params = formalParameters()
+            throwTypes = throwTypes()
             body = block()
             { 
                 memberDecl = 
                 new JConstructorDeclaration( line, mods, 
-                                             name, params, body );
+                                             name, throwTypes, params, body );
             }
         ) |     
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
@@ -705,7 +707,8 @@ private JMember classMemberDecl( ArrayList<String>  mods ): {
             ) 
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
-            params = formalParameters() 
+            params = formalParameters()
+            throwTypes = throwTypes()
             ( 
                 body = block() | 
                 <SEMI> 
@@ -713,7 +716,7 @@ private JMember classMemberDecl( ArrayList<String>  mods ): {
             { 
                 memberDecl = 
                    new JMethodDeclaration( line, mods, name, 
-                                           type, params, body ); 
+                                           type, throwTypes, params, body ); 
             } 
         ) | 
         ( 
@@ -877,6 +880,10 @@ private JStatement statement(): {
 	JFormalParameter variable = null;
 	JExpression exp2 = null;
 	JExpression exp3 = null;
+	JStatement catchBlock = null;
+	ArrayList<JStatement> catchBlocks = null;
+	JFormalParameter exceptionToCatch = null;
+    ArrayList<JFormalParameter> exceptionsToCatch = null;
 }
 {       
     try {
@@ -940,6 +947,29 @@ private JStatement statement(): {
 				statement = new JForStatement(line, initializer, exp2, exp3, body);
 			}
         } |
+        <TRY>
+        body = statement()
+        { 
+        	catchBlocks = new ArrayList<JStatement>();
+        	exceptionsToCatch = new ArrayList<JFormalParameter>();
+        }
+        (
+        	<CATCH> <LPAREN> exceptionToCatch = formalParameter() <RPAREN>
+        	catchBlock = statement()
+        	{ 
+        		exceptionsToCatch.add(exceptionToCatch);
+        		catchBlocks.add(catchBlock);
+        	}
+        )*
+        [
+        	<FINALLY>
+        	alternate = statement()
+        ]
+        { statement = new JTryCatchFinallyStatement(line, body, catchBlocks, exceptionsToCatch, alternate); } |
+        <THROW>
+        expr = expression()
+        <SEMI>
+        { statement = new JThrowStatement(line, expr); } |
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
@@ -1019,6 +1049,36 @@ private JFormalParameter formalParameter(): {
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return new JFormalParameter( line, name, type ); }
+}
+
+/**
+ * Parse a (list of) thrown exception types
+ * 
+ * <pre>
+ *   throwTypes ::= [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+ * </pre>
+ * 
+ * @return a list of AST for throwTypes
+ */
+private ArrayList<Type> throwTypes(): {
+	ArrayList<Type> throwTypes = new ArrayList<Type>();
+	Type throwType = null;
+} {
+    try {
+        [ 
+    		<THROWS>
+            throwType = qualifiedIdentifier()
+            { throwTypes.add( throwType ); }
+            ( 
+                <COMMA> throwType = qualifiedIdentifier()
+                { throwTypes.add( throwType ); }
+            )* 
+        ]
+    } 
+    catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return throwTypes; }
 }
 
 /**

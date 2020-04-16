@@ -663,8 +663,9 @@ public class Parser {
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
 			ArrayList<JFormalParameter> params = formalParameters();
+			ArrayList<Type> throwTypes = throwTypes();
 			JBlock body = block();
-			memberDecl = new JConstructorDeclaration(line, mods, name, params, body);
+			memberDecl = new JConstructorDeclaration(line, mods, name, throwTypes, params, body);
 		} else {
 			Type type = null;
 			if (have(VOID)) {
@@ -942,9 +943,9 @@ public class Parser {
 		ArrayList<Type> throwTypes = new ArrayList<Type>();
 		if (have(THROWS)) {
 			throwTypes.add(qualifiedIdentifier());
-		}
-		while (have(COMMA)) {
-			throwTypes.add(qualifiedIdentifier());
+			while (have(COMMA)) {
+				throwTypes.add(qualifiedIdentifier());
+			}
 		}
 		return throwTypes;
 	}
