@@ -2,8 +2,8 @@ interface A {
     public int f(int x);
 }
 
-interface AA {
-    public int g(int x);
+public interface AA {
+    public int g(int x) throws Exception;
     int z = 5;
 }
 

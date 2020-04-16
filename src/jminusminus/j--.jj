@@ -391,17 +391,24 @@ private TypeName qualifiedIdentifier(): {
 
 private JAST typeDeclaration(): {
     ArrayList<String> mods = null;
-    JAST classDeclaration = null;
+    JAST declaration = null;
 }
 {
     try {
-        mods = modifiers()
-        classDeclaration = classDeclaration( mods )
+        LOOKAHEAD ( modifiers() <CLASS> ) 
+        (
+			mods = modifiers()
+			declaration = classDeclaration( mods )
+        ) | LOOKAHEAD( modifiers() <INTERFACE> )
+        (
+			mods = modifiers()
+			declaration = interfaceDeclaration( mods )
+        )
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return classDeclaration; }
+    { return declaration; }
 }
 
 /**
@@ -491,6 +498,7 @@ private ArrayList<String> modifiers(): {
  * <pre>
  *   classDeclaration ::= CLASS IDENTIFIER 
  *                        [EXTENDS qualifiedIdentifier] 
+ *                        [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
  *                        classBody
  * </pre>
  * 
@@ -506,6 +514,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+	ArrayList<Type> implementsTypes = new ArrayList<Type>();
 }
 {
     try {
@@ -514,6 +523,14 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
+        [ 
+            <IMPLEMENTS>
+            { implementsTypes.add(qualifiedIdentifier()); }
+            (
+				<COMMA>
+				{ implementsTypes.add(qualifiedIdentifier()); }
+            )*
+        ]
         classBody = classBody()           
     } 
     catch ( ParseException e ) { 
@@ -521,7 +538,47 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     }
     { 
         return new JClassDeclaration( line, mods, 
-            name, superClass, classBody ); 
+            name, superClass, implementsTypes, classBody ); 
+    }
+}
+
+/**
+ * Parse an interface declaration.
+ * 
+ * <pre>
+ *    interfaceDeclaration ::= INTERFACE IDENTIFIER 
+ *                           [EXTENDS qualifiedIdentifier] 
+ *                           interfaceBody
+ * </pre>
+ * 
+ * An interface which doesn't explicitly extend another (super) interface 
+ * implicitly extends the superclass java.lang.Object.
+ * 
+ * @param mods the interface modifiers.
+ * @return an AST for a interfaceDeclaration.
+ */
+     
+private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
+    int line = 0;
+    String name = "";
+    Type superClass = Type.OBJECT;
+    ArrayList<JMember> interfaceBody = null;
+}
+{
+    try {
+        <INTERFACE> { line = token.beginLine; }
+        <IDENTIFIER> { name = token.image; }
+        [ 
+            <EXTENDS> superClass = qualifiedIdentifier() 
+        ]
+        interfaceBody = interfaceBody()           
+    } 
+    catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { 
+        return new JInterfaceDeclaration( line, mods, 
+            name, superClass, interfaceBody ); 
     }
 }
 
@@ -558,7 +615,39 @@ private ArrayList<JMember> classBody(): {
 }
 
 /**
- * Parse a member declaration.
+ * Parse an interface body.
+ * 
+ * <pre>
+ *   interfaceBody ::= LCURLY
+ *                   {modifiers interfaceMemberDecl}
+ *                 RCURLY
+ * </pre>
+ * 
+ * @return list of members in the class body.
+ */
+
+private ArrayList<JMember> interfaceBody(): {
+    ArrayList<String> mods = null;
+    JMember aMember = null;
+    ArrayList<JMember> members = new ArrayList<JMember>();
+}
+{
+    try {
+        <LCURLY>
+        ( 
+            mods = modifiers()
+            aMember = interfaceMemberDecl( mods ) { members.add( aMember ); } 
+        )*
+        <RCURLY>
+    } 
+    catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return members; }
+}
+
+/**
+ * Parse a class member declaration.
  * 
  * <pre>
  *   classMemberDecl ::= IDENTIFIER            // constructor
@@ -625,6 +714,65 @@ private JMember classMemberDecl( ArrayList<String>  mods ): {
                 memberDecl = 
                    new JMethodDeclaration( line, mods, name, 
                                            type, params, body ); 
+            } 
+        ) | 
+        ( 
+            type = type() { line = token.beginLine; }
+            variableDeclarators = variableDeclarators( type )
+            <SEMI>
+            { 
+                memberDecl = new JFieldDeclaration( line, mods, 
+                    variableDeclarators ); 
+            }
+        )
+    } 
+    catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return memberDecl; }
+}
+
+/**
+ * Parse an interface member declaration.
+ * 
+ * <pre>
+ *    interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
+ *    						    formalParameters throwTypes
+ *    						    SEMI
+ *                    		  | type variableDeclarators SEMI // field
+ * </pre>
+ * 
+ * @param mods the class member modifiers.
+ * @return an AST for a memberDecl.
+ */
+    
+private JMember interfaceMemberDecl( ArrayList<String>  mods ): {
+    int line = 0;
+    Type type = null;
+    String name = "";
+    ArrayList<JFormalParameter> params = null;
+    ArrayList<Type> throwTypes = null;
+    JBlock body = null;
+    ArrayList<JVariableDeclarator> variableDeclarators = null;
+    JMember memberDecl = null;
+}
+{
+    try {
+        LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
+        (
+            ( 
+                <VOID> { type = Type.VOID; } | 
+                type = type() 
+            ) 
+            { line = token.beginLine; }
+            <IDENTIFIER> { name = token.image; } 
+            params = formalParameters() 
+            throwTypes = throwTypes()
+			<SEMI> 
+            { 
+                memberDecl = 
+                   new JMethodDeclaration( line, mods, name, 
+                                           type, throwTypes, params, body ); 
             } 
         ) | 
         ( 
