@@ -1,4 +1,8 @@
 public class ExceptionHandlers {
+	public ExceptionHandlers() throws Exception1 {
+		
+	}
+	
     private static void f() throws Exception1, Exception2 {
         throw new Exception1();
     }

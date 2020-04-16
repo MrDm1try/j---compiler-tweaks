@@ -46,7 +46,7 @@ statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
             | FOR forExpression statement
-            | TRY statement {CATCH catchExpression statement} [FINALLY statement]
+            | TRY statement {CATCH LPAREN formalParameter RPAREN statement} [FINALLY statement]
             | THROW expression SEMI
             | RETURN [expression] SEMI
             | SEMI 
@@ -87,8 +87,6 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 forExpression ::= LPAREN [[type] variableDeclarator] SEMI [expression] SEMI [expression] RPAREN // basic for
 				| LPAREN formalParameter COLON expression RPAREN // enhanced for loop
-				
-catchExpression ::= LPAREN formalParameter RPAREN
 
 expression ::= assignmentExpression | conditionalExpression
 
