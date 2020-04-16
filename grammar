@@ -94,10 +94,10 @@ expression ::= assignmentExpression | conditionalExpression
 
 conditionalExpression ::= assignmentExpression TERN assignmentExpression COLON assignmentExpression
 
-assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
+assignmentExpression ::= conditionalExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | LNOT_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
 
-conditionalAndExpression ::= bitwiseExpressionFour // level 10
+conditionalExpression ::= bitwiseExpressionFour // level 10
                                {LAND | LOR bitwiseExpressionFour}                               
                                
 bitwiseExpressionFour ::= bitwiseExpressionThree		// level 9

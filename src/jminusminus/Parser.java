@@ -1222,7 +1222,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   assignmentExpression ::= 
-	 *       conditionalAndExpression // level 13
+	 *       conditionalExpression // level 13
 	 *           [( ASSIGN  // conditionalExpression
 	 *            | PLUS_ASSIGN // must be valid lhs
 	 *            | MINUS_ASSIGN // must be valid lhs
@@ -1238,7 +1238,7 @@ public class Parser {
 
 	private JExpression assignmentExpression() {
 		int line = scanner.token().line();
-		JExpression lhs = conditionalAndExpression();
+		JExpression lhs = conditionalExpression();
 		if (have(ASSIGN)) {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
@@ -1260,14 +1260,14 @@ public class Parser {
 	 * Parse a conditional-and expression.
 	 * 
 	 * <pre>
-	 *   conditionalAndExpression ::= bitwiseExpressionFour // level 10
+	 *   conditionalExpression ::= bitwiseExpressionFour // level 10
 	 *                                  {LAND | LOR equalityExpression}
 	 * </pre>
 	 * 
 	 * @return an AST for a conditionalExpression.
 	 */
 
-	private JExpression conditionalAndExpression() {
+	private JExpression conditionalExpression() {
 		int line = scanner.token().line();
 		boolean more = true;
 		JExpression lhs = bitwiseExpressionFour();
