@@ -1314,9 +1314,13 @@ private JExpression expression(): {
  * 
  * <pre>
  *   assignmentExpression ::= 
- *       conditionalAndExpression // level 13
+ *       conditionalExpression // level 13
  *           [( ASSIGN  // conditionalExpression
  *            | PLUS_ASSIGN // must be valid lhs
+ *            | MINUS_ASSIGN // must be valid lhs
+ *            | STAR_ASSIGN // must be valid lhs
+ *            | DIV_ASSIGN // must be valid lhs
+ *            | REM_ASSIGN // must be valid lhs
  *            )
  *            assignmentExpression]
  * </pre>
@@ -1330,14 +1334,26 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalExpression() { line = lhs.line(); }
         [       
             <ASSIGN> 
             rhs = assignmentExpression()
             { lhs = new JAssignOp( line, lhs, rhs ); } |
             <PLUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
+            <MINUS_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JMinusAssignOp( line, lhs, rhs ); } |
+            <STAR_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JStarAssignOp( line, lhs, rhs ); } |
+            <DIV_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JDivAssignOp( line, lhs, rhs ); } |
+            <REM_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JRemAssignOp( line, lhs, rhs ); }
         ]
     } 
     catch ( ParseException e ) { 
@@ -1350,14 +1366,14 @@ private JExpression assignmentExpression(): {
  * Parse a conditional-and expression.
  * 
  * <pre>
- *   conditionalAndExpression ::= equalityExpression // level 10
+ *   conditionalExpression ::= equalityExpression // level 10
  *                                  {LAND equalityExpression}
  * </pre>
  * 
  * @return an AST for a conditionalExpression.
  */
 
-private JExpression conditionalAndExpression(): {
+private JExpression conditionalExpression(): {
     int line = 0;
     JExpression lhs = null, rhs = null;
 }
@@ -1367,7 +1383,10 @@ private JExpression conditionalAndExpression(): {
         ( 
             <LAND>
             rhs = equalityExpression()
-            { lhs = new JLogicalAndOp( line, lhs, rhs ); }
+            { lhs = new JLogicalAndOp( line, lhs, rhs ); } |
+            <LOR>
+            rhs = equalityExpression()
+            { lhs = new JLogicalOrOp( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1512,6 +1531,7 @@ private JExpression multiplicativeExpression(): {
  * 
  * <pre>
  *   unaryExpression ::= INC unaryExpression // level 1
+ *                     | DEC unaryExpression
  *                     | MINUS unaryExpression
  *                     | simpleUnaryExpression
  * </pre>
@@ -1528,6 +1548,9 @@ private JExpression unaryExpression(): {
         <INC> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JPreIncrementOp( line, unaryExpr ); } | 
+        <DEC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JPreDecrementOp( line, unaryExpr ); } | 
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp( line, unaryExpr ); } |
