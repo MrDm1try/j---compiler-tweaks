@@ -247,7 +247,7 @@ class JMethodDeclaration extends JAST implements JMember {
 			}
 			p.println("</FormalParameters>");
 		}
-		if (throwTypes.size() > 0) {
+		if (throwTypes != null && throwTypes.size() > 0) {
 			p.println("<Throws>");
 			for (Type throwType : throwTypes) {
 				p.indentRight();

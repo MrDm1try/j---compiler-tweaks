@@ -663,8 +663,9 @@ public class Parser {
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
 			ArrayList<JFormalParameter> params = formalParameters();
+			ArrayList<Type> throwTypes = throwTypes();
 			JBlock body = block();
-			memberDecl = new JConstructorDeclaration(line, mods, name, params, body);
+			memberDecl = new JConstructorDeclaration(line, mods, name, throwTypes, params, body);
 		} else {
 			Type type = null;
 			if (have(VOID)) {
@@ -942,9 +943,9 @@ public class Parser {
 		ArrayList<Type> throwTypes = new ArrayList<Type>();
 		if (have(THROWS)) {
 			throwTypes.add(qualifiedIdentifier());
-		}
-		while (have(COMMA)) {
-			throwTypes.add(qualifiedIdentifier());
+			while (have(COMMA)) {
+				throwTypes.add(qualifiedIdentifier());
+			}
 		}
 		return throwTypes;
 	}
@@ -1222,7 +1223,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   assignmentExpression ::= 
-	 *       conditionalAndExpression // level 13
+	 *       conditionalExpression // level 13
 	 *           [( ASSIGN  // conditionalExpression
 	 *            | PLUS_ASSIGN // must be valid lhs
 	 *            | MINUS_ASSIGN // must be valid lhs
@@ -1238,7 +1239,7 @@ public class Parser {
 
 	private JExpression assignmentExpression() {
 		int line = scanner.token().line();
-		JExpression lhs = conditionalAndExpression();
+		JExpression lhs = conditionalExpression();
 		if (have(ASSIGN)) {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
@@ -1260,14 +1261,14 @@ public class Parser {
 	 * Parse a conditional-and expression.
 	 * 
 	 * <pre>
-	 *   conditionalAndExpression ::= bitwiseExpressionFour // level 10
+	 *   conditionalExpression ::= bitwiseExpressionFour // level 10
 	 *                                  {LAND | LOR equalityExpression}
 	 * </pre>
 	 * 
 	 * @return an AST for a conditionalExpression.
 	 */
 
-	private JExpression conditionalAndExpression() {
+	private JExpression conditionalExpression() {
 		int line = scanner.token().line();
 		boolean more = true;
 		JExpression lhs = bitwiseExpressionFour();
