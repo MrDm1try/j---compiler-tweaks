@@ -11,8 +11,11 @@ import static jminusminus.CLConstants.*;
 class JForStatement extends JStatement {
 
 	/** Loop variable - only one is used. */
-	private JVariableDeclarator varDecl;
+	private JVariableDeclaration varDecl;
 	private JExpression initializer;
+	
+	/** Used if loop variable was declared in the loop statement. */
+	private JStatement analyzedVarDecl;
 
 	/** Test expression. */
 	private JExpression termination;
@@ -22,6 +25,9 @@ class JForStatement extends JStatement {
 
 	/** The body. */
 	private JStatement body;
+
+    /** Context for this loop. */
+    private LocalContext context;
 
 	/**
 	 * Construct an AST node for a for-statement given its line number, the test
@@ -37,16 +43,18 @@ class JForStatement extends JStatement {
 		super(line);
 		this.initializer = initializer;
 		this.varDecl = null;
+		this.analyzedVarDecl = null;
 		this.termination = termination;
 		this.increment = increment;
 		this.body = body;
 	}
 
-	public JForStatement(int line, JVariableDeclarator varDecl, JExpression termination, JExpression increment,
+	public JForStatement(int line, JVariableDeclaration varDecl, JExpression termination, JExpression increment,
 			JStatement body) {
 		super(line);
 		this.initializer = null;
 		this.varDecl = varDecl;
+		this.analyzedVarDecl = null;
 		this.termination = termination;
 		this.increment = increment;
 		this.body = body;
@@ -61,18 +69,21 @@ class JForStatement extends JStatement {
 	 */
 
 	public JForStatement analyze(Context context) {
+        // we define a new context for the whole loop
+        this.context = new LocalContext(context);
+
 		if (varDecl == null) {
-			initializer = initializer.analyze(context);
+			initializer = initializer.analyze(this.context);
 		} else {
-			varDecl = varDecl.analyze(context);
+			analyzedVarDecl = varDecl.analyze(this.context);
 		}
 
-		termination = termination.analyze(context);
+		termination = termination.analyze(this.context);
 		termination.type().mustMatchExpected(line(), Type.BOOLEAN);
 
-		increment = increment.analyze(context);
+		increment = increment.analyze(this.context);
 
-		body = (JStatement) body.analyze(context);
+		body = (JStatement) body.analyze(this.context);
 		return this;
 	}
 
@@ -116,6 +127,11 @@ class JForStatement extends JStatement {
 	public void writeToStdOut(PrettyPrinter p) {
 		p.printf("<JForStatement line=\"%d\">\n", line());
 		p.indentRight();
+        if (context != null) {
+            p.indentRight();
+            context.writeToStdOut(p);
+            p.indentLeft();
+        }
 		if (varDecl == null) {
 			p.printf("<Initializer>\n");
 			p.indentRight();

@@ -6,7 +6,7 @@ public class ForStatements {
         for (int i = 1; i <= 5; i++) {
             sum1 += i;
         }
-        for (i = 6; i <= 10; i++) {
+        for (int i = 6; i <= 10; i++) {
             sum1 += i;
         }
         int[][] as = {{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}};

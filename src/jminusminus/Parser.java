@@ -815,7 +815,7 @@ public class Parser {
 			return new JWhileStatement(line, test, statement);
 		} else if (have(FOR)) {
 			JExpression initializer = null;
-			JVariableDeclarator varDecl = null;
+			JVariableDeclaration varDecl = null;
 			JFormalParameter variable = null;
 			JExpression exp2 = null;
 			JExpression exp3 = null;
@@ -825,8 +825,7 @@ public class Parser {
 					variable = formalParameter();
 					mustBe(COLON);
 				} else if (seeLocalVariableDeclaration()) {
-					varDecl = variableDeclarator(type());
-					mustBe(SEMI);
+					varDecl = localVariableDeclarationStatement();
 				} else {
 					initializer = expression();
 					mustBe(SEMI);

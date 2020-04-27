@@ -19,6 +19,9 @@ class JForEachStatement extends JStatement {
     /** The body. */
     private JStatement body;
 
+    /** Context for this loop. */
+    private LocalContext context;
+
     /**
      * Construct an AST node for a for-each-statement given its line number, the
      * test expression, and the body.
@@ -48,10 +51,19 @@ class JForEachStatement extends JStatement {
      */
 
     public JForEachStatement analyze(Context context) {
-        variable = (JFormalParameter) variable.analyze(context);
-        enumeration = enumeration.analyze(context);
+        // we define a new context for the whole loop
+        this.context = new LocalContext(context);
 
-        body = (JStatement) body.analyze(context);
+        // registering the variable in the current context
+		LocalVariableDefn defn = new LocalVariableDefn(variable.type().resolve(this.context), 
+				this.context.nextOffset());
+		defn.initialize();
+		this.context.addEntry(variable.line(), variable.name(), defn);
+
+        variable = (JFormalParameter) variable.analyze(this.context);
+        enumeration = enumeration.analyze(this.context);
+
+        body = (JStatement) body.analyze(this.context);
         return this;
     }
 
@@ -92,6 +104,11 @@ class JForEachStatement extends JStatement {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
+        if (context != null) {
+            p.indentRight();
+            context.writeToStdOut(p);
+            p.indentLeft();
+        }
         p.printf("<Variable>\n");
         p.indentRight();
         variable.writeToStdOut(p);
