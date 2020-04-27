@@ -107,6 +107,13 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
+        
+        for (Type throwType : throwTypes) {
+            if (!Type.EXCEPTION.isJavaAssignableFrom(throwType)) {
+    			JAST.compilationUnit.reportSemanticError(line(), "Throw type is not an exception.");
+            }
+        }
+        
         if (body != null) {
             body = body.analyze(this.context);
         }

@@ -128,8 +128,6 @@ class JMethodDeclaration extends JAST implements JMember {
 			descriptor += param.type().toDescriptor();
 		}
 		descriptor += ")" + returnType.toDescriptor();
-		for (Type throwType : throwTypes)
-			descriptor += throwType.toDescriptor();
 
 		// Generate the method with an empty body (for now)
 		partialCodegen(context, partial);
@@ -146,8 +144,6 @@ class JMethodDeclaration extends JAST implements JMember {
 	 */
 
 	public JAST analyze(Context context) {
-		//todo throwtypes?
-		
 		MethodContext methodContext = new MethodContext(context, isStatic, returnType);
 		this.context = methodContext;
 
@@ -163,6 +159,13 @@ class JMethodDeclaration extends JAST implements JMember {
 			defn.initialize();
 			this.context.addEntry(param.line(), param.name(), defn);
 		}
+        
+        for (Type throwType : throwTypes) {
+            if (!Type.EXCEPTION.isJavaAssignableFrom(throwType)) {
+    			JAST.compilationUnit.reportSemanticError(line(), "Throw type is not an exception.");
+            }
+        }
+        
 		if (body != null) {
 			body = body.analyze(this.context);
 			if (returnType != Type.VOID && !methodContext.methodHasReturn()) {

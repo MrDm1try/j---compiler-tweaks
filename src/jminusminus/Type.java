@@ -57,6 +57,9 @@ class Type {
     /** The type java.lang.Object. */
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
+    /** The type java.lang.Exception. */
+    public static Type EXCEPTION = typeFor(java.lang.Exception.class);
+
     /** The void type. */
     public final static Type VOID = typeFor(void.class);
 

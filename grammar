@@ -46,7 +46,7 @@ statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
             | FOR forExpression statement
-            | TRY statement {CATCH LPAREN formalParameter RPAREN statement} [FINALLY statement]
+            | TRY statement {CATCH catchExpression statement} [FINALLY statement]
             | THROW expression SEMI
             | RETURN [expression] SEMI
             | SEMI 
@@ -61,6 +61,8 @@ formalParameter ::= type IDENTIFIER
 throwTypes ::= [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
 
 parExpression ::= LPAREN expression RPAREN
+
+catchExpression ::= LPAREN formalParameter RPAREN
 
 localVariableDeclarationStatement ::= type variableDeclarators SEMI
 

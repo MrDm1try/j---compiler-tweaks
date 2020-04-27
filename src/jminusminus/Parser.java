@@ -790,7 +790,8 @@ public class Parser {
 	 *   statement ::= block
 	 *               | IF parExpression statement [ELSE statement]
 	 *               | WHILE parExpression statement
-	        		 | FOR forExpression statement 
+	        		 | FOR forExpression statement
+	        		 | TRY statement {CATCH catchExpression statement} [FINALLY statement] 
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
@@ -852,6 +853,7 @@ public class Parser {
 				return new JForStatement(line, initializer, exp2, exp3, body);
 			}
 		} else if (have(TRY)) {
+			// TRY statement {CATCH catchExpression statement} [FINALLY statement]
 			JStatement tryBlock = statement();
 			ArrayList<JStatement> catchBlocks = new ArrayList<JStatement>();
             ArrayList<JFormalParameter> exceptionsToCatch = new ArrayList<JFormalParameter>();

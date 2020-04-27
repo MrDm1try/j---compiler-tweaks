@@ -29,17 +29,18 @@ class JThrowStatement extends JStatement {
 	}
 
 	/**
-	 * Analysis distinguishes between our being in a constructor or in a regular
-	 * method in checking return types. In the case of a return expression, analyze
-	 * it and check types. Determine the (possibly void) return type.
 	 * 
 	 * @param context context in which names are resolved.
 	 * @return the analyzed (and possibly rewritten) AST subtree.
 	 */
 
 	public JStatement analyze(Context context) {
-		// todo type check
-		return this;
+        MethodContext methodContext = context.methodContext();
+        expr = expr.analyze(methodContext);
+        if (!Type.EXCEPTION.isJavaAssignableFrom(expr.type())) {
+			JAST.compilationUnit.reportSemanticError(line(), "Thrown expression is not an exception.");
+        }
+        return this;
 	}
 
 	public void codegen(CLEmitter output) {

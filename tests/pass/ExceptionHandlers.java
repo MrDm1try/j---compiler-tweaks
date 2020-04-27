@@ -1,18 +1,23 @@
+import java.lang.Exception;
+
+class ExceptionOne extends Exception {}
+class ExceptionTwo extends Exception {}
+
 public class ExceptionHandlers {
-	public ExceptionHandlers() throws Exception1 {
+	public ExceptionHandlers() throws ExceptionOne {
 		
 	}
 	
-    private static void f() throws Exception1, Exception2 {
-        throw new Exception1();
+    private static void f() throws ExceptionOne, ExceptionTwo {
+        throw new ExceptionOne();
     }
     
     public static void main(String[] args) {
         try {
             f();
         }
-        catch (Exception1 e1) { ; }
-        catch (Exception2 e2) { ; }
+        catch (ExceptionOne e1) { ; }
+        catch (ExceptionTwo e2) { ; }
         finally { ; }
     }
 }

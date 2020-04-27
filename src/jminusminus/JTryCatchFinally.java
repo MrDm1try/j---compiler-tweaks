@@ -14,7 +14,7 @@ class JTryCatchFinallyStatement extends JStatement {
     /** Catch blocks. */
     private ArrayList<JStatement> catchBlocks;
 
-    /** Catch blocks. */
+    /** Catch expressions. */
     private ArrayList<JFormalParameter> exceptionsToCatch;
 
     /** Try block. */
@@ -54,9 +54,22 @@ class JTryCatchFinallyStatement extends JStatement {
      */
 
     public JTryCatchFinallyStatement analyze(Context context) {
-        // todo
         tryBlock = (JStatement) tryBlock.analyze(context);
+        for (int i = 0; i < catchBlocks.size(); i++)
+        	catchBlocks.set(i, (JStatement) catchBlocks.get(i).analyze(context));
         finallyBlock = (JStatement) finallyBlock.analyze(context);
+        
+
+        for (JFormalParameter catchException : exceptionsToCatch) {
+        	catchException.setType(catchException.type().resolve(context));
+        }
+        
+        for (JFormalParameter catchException : exceptionsToCatch) {
+            if (!Type.EXCEPTION.isJavaAssignableFrom(catchException.type())) {
+    			JAST.compilationUnit.reportSemanticError(line(), "Catch expression is not an exception.");
+            }
+        }
+        
         return this;
     }
 
