@@ -27,11 +27,8 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Interface block. */
     private ArrayList<JMember> interfaceBlock;    
 
-    /** Context for this class. */
+    /** Context for this interface. */
     private ClassContext context;
-
-    /** Whether this class has an explicit constructor. */
-    private boolean hasExplicitConstructor;
 
     /** Instance fields of this class. */
     private ArrayList<JFieldDeclaration> instanceFieldInitializations;
@@ -128,6 +125,29 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     public void preAnalyze(Context context) {
         
+        this.context = new ClassContext(this, context);
+        superType = superType.resolve(this.context);
+
+        thisType.checkAccess(line, superType);
+        if (superType.isFinal()) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Cannot extend a final type: %s", superType.toString());
+        }
+
+        CLEmitter partial = new CLEmitter(false);
+
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+
+        for (JMember member : interfaceBlock) {
+            member.preAnalyze(this.context, partial);
+        }
+
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
     }
 
     /**
@@ -141,6 +161,24 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public JAST analyze(Context context) {
+        
+        // Analyze all members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).analyze(this.context);
+        }
+
+        // Copy declared fields for purposes of initialization.
+        for (JMember member : interfaceBlock) {
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
+                if (fieldDecl.mods().contains("static")) {
+                    staticFieldInitializations.add(fieldDecl);
+                } else {
+                    instanceFieldInitializations.add(fieldDecl);
+                }
+            }
+        }
+
         
         return this;
     }
