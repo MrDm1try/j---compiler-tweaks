@@ -30,8 +30,8 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Context for this interface. */
     private ClassContext context;
 
-    /** Instance fields of this class. */
-    private ArrayList<JFieldDeclaration> instanceFieldInitializations;
+    /** Static fields of this class. */
+    private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
 
     /**
@@ -58,8 +58,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         this.name = name;
         this.superType = superType;
         this.interfaceBlock = interfaceBlock;
-        hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
 
     /**
@@ -93,25 +92,20 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     }
 
     /**
-     * The initializations for instance fields (now expressed as assignment
-     * statments).
-     * 
-     * @return the field declarations having initializations.
-     */
-
-    public ArrayList<JFieldDeclaration> instanceFieldInitializations() {
-        return instanceFieldInitializations;
-    }
-
-    /**
-     * Declare this class in the parent (compilation unit) context.
+     * Declare this interface in the parent (compilation unit) context.
      * 
      * @param context
      *            the parent (compilation unit) context.
      */
 
     public void declareThisType(Context context) {
-        
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        CLEmitter partial = new CLEmitter(false);
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
+                false); // Object for superClass, just for now
+        thisType = Type.typeFor(partial.toClass());
+        context.addType(line, thisType);
     }
 
     /**
@@ -123,8 +117,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      *            the parent (compilation unit) context.
      */
 
-    public void preAnalyze(Context context) {
-        
+    public void preAnalyze(Context context) {        
         this.context = new ClassContext(this, context);
         superType = superType.resolve(this.context);
 
@@ -160,25 +153,31 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JAST analyze(Context context) {
-        
+    public JAST analyze(Context context) {        
         // Analyze all members
         for (JMember member : interfaceBlock) {
             ((JAST) member).analyze(this.context);
         }
 
         // Copy declared fields for purposes of initialization.
+        ArrayList<String> allowedFieldMods = new ArrayList<String>();
+        allowedFieldMods.add("public");
+        allowedFieldMods.add("static");
+        allowedFieldMods.add("final");
+        
         for (JMember member : interfaceBlock) {
             if (member instanceof JFieldDeclaration) {
                 JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
-                if (fieldDecl.mods().contains("static")) {
-                    staticFieldInitializations.add(fieldDecl);
+                ArrayList<String> modsCopy = new ArrayList<String>(fieldDecl.mods());
+                modsCopy.removeAll(allowedFieldMods);
+                if (!modsCopy.isEmpty()) {
+                    JAST.compilationUnit.reportSemanticError(line,
+                            "Interface field has illegal modifiers: %s", modsCopy.toString());
                 } else {
-                    instanceFieldInitializations.add(fieldDecl);
+                    staticFieldInitializations.add(fieldDecl);
                 }
             }
         }
-
         
         return this;
     }

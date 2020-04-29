@@ -32,8 +32,12 @@ class JThis extends JExpression {
      */
 
     public JExpression analyze(Context context) {
-        type = ((JClassDeclaration) context.classContext.definition())
-                .thisType();
+        try {
+        	type = ((JClassDeclaration) context.classContext.definition()).thisType();
+        } catch (ClassCastException e) {
+        	type = ((JInterfaceDeclaration) context.classContext.definition()).thisType();
+        }
+                
         return this;
     }
 
