@@ -1,13 +1,13 @@
 import java.lang.Exception;
 
 interface A {
-	int y = 5;
+	double y = 2.0;
     public int f(int x);
 }
 
 public interface AA {
-    public int g(int x) throws Exception;
-    int z = 5;
+    public double g(double x) throws Exception;
+    public static double z = 5.1;
 }
 
 class B {
@@ -26,7 +26,9 @@ public class D implements A, AA {
     public int f(int x) {
         return x * x;
     }
-    public int g(int x) {
-        return x + z;
+    
+    public double g(double x) {
+        return x + y + z;
     }
+ 
 }

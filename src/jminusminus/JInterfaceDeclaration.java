@@ -102,8 +102,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
-                false); // Object for superClass, just for now
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
     }
@@ -163,7 +162,6 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         ArrayList<String> allowedFieldMods = new ArrayList<String>();
         allowedFieldMods.add("public");
         allowedFieldMods.add("static");
-        allowedFieldMods.add("final");
         
         for (JMember member : interfaceBlock) {
             if (member instanceof JFieldDeclaration) {

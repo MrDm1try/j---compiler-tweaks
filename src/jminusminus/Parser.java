@@ -745,9 +745,6 @@ public class Parser {
 				if (!mods.contains("static")) {
 					mods.add("static");
 				}
-				if (!mods.contains("final")) {
-					mods.add("final");
-				}
 				memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
 				mustBe(SEMI);
 			}
@@ -1774,10 +1771,10 @@ public class Parser {
 
 	private JExpression literal() {
 		int line = scanner.token().line();
-		if (have(INT_LITERAL)) {
-			return new JLiteralInt(line, scanner.previousToken().image());
-		} else if (have(DOUBLE_LITERAL)) {
+		if (have(DOUBLE_LITERAL)) {
 			return new JLiteralDouble(line, scanner.previousToken().image());
+		} else if (have(INT_LITERAL)) {
+			return new JLiteralInt(line, scanner.previousToken().image());
 		} else if (have(CHAR_LITERAL)) {
 			return new JLiteralChar(line, scanner.previousToken().image());
 		} else if (have(STRING_LITERAL)) {
