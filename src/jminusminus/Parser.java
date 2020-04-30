@@ -581,13 +581,14 @@ public class Parser {
 		mustBe(INTERFACE);
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
-		Type superClass;
+		ArrayList<Type> extendsTypes = new ArrayList<Type>();
 		if (have(EXTENDS)) {
-			superClass = qualifiedIdentifier();
-		} else {
-			superClass = Type.OBJECT;
+			extendsTypes.add(qualifiedIdentifier());
+			
+			while (have(COMMA))
+				extendsTypes.add(qualifiedIdentifier());
 		}
-		return new JInterfaceDeclaration(line, mods, name, superClass, interfaceBody());
+		return new JInterfaceDeclaration(line, mods, name, extendsTypes, interfaceBody());
 	}
 
 	/**
@@ -723,6 +724,9 @@ public class Parser {
 			ArrayList<JFormalParameter> params = formalParameters();
 			ArrayList<Type> throwTypes = throwTypes();
 			mustBe(SEMI);
+			if (!mods.contains("public")) {
+				mods.add("public");
+			}
 			if (!mods.contains("abstract")) {
 				mods.add("abstract");
 			}
@@ -736,14 +740,23 @@ public class Parser {
 				ArrayList<JFormalParameter> params = formalParameters();
 				ArrayList<Type> throwTypes = throwTypes();
 				mustBe(SEMI);
+				if (!mods.contains("public")) {
+					mods.add("public");
+				}
 				if (!mods.contains("abstract")) {
 					mods.add("abstract");
 				}
 				memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, null);
 			} else {
 				// Field
+				if (!mods.contains("public")) {
+					mods.add("public");
+				}
 				if (!mods.contains("static")) {
 					mods.add("static");
+				}
+				if (!mods.contains("final")) {
+					mods.add("final");
 				}
 				memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
 				mustBe(SEMI);

@@ -89,6 +89,11 @@ class JMethodDeclaration extends JAST implements JMember {
 		this.isStatic = mods.contains("static");
 		this.isPrivate = mods.contains("private");
 	}
+	
+	/** Return list of modifiers */
+	public ArrayList<String> mods() {
+		return mods;
+	}
 
 	/**
 	 * Declare this method in the parent (class) context.

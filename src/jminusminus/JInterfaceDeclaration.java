@@ -1,6 +1,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -18,8 +19,8 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Class name. */
     private String name;
 
-    /** Super class type. */
-    private Type superType;
+    /** extends */
+    private ArrayList<Type> extendsTypes;
 
     /** This class type. */
     private Type thisType;
@@ -30,35 +31,27 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Context for this interface. */
     private ClassContext context;
 
-    /** Static fields of this class. */
+    /** Static fields of this interface. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
 
     /**
-     * Construct an AST node for a class declaration given the line number, list
-     * of class modifiers, name of the class, its super class type, and the
-     * class block.
-     * 
-     * @param line
-     *            line in which the class declaration occurs in the source file.
-     * @param mods
-     *            class modifiers.
-     * @param name
-     *            class name.
-     * @param superType
-     *            super class type.
-     * @param interfaceBlock
-     *            class block.
+     * Construct an AST node for an interface declaration 
      */
 
     public JInterfaceDeclaration(int line, ArrayList<String> mods, String name,
-            Type superType, ArrayList<JMember> interfaceBlock) {
+    		ArrayList<Type> extendsTypes, ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
-        this.superType = superType;
+        this.extendsTypes = extendsTypes;
         this.interfaceBlock = interfaceBlock;
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        
+        if (!this.mods.contains("interface"))
+        	this.mods.add("interface");
+        if (!this.mods.contains("abstract"))
+        	this.mods.add("abstract");
     }
 
     /**
@@ -78,7 +71,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public Type superType() {
-        return superType;
+        return Type.OBJECT;
     }
 
     /**
@@ -118,19 +111,23 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     public void preAnalyze(Context context) {        
         this.context = new ClassContext(this, context);
-        superType = superType.resolve(this.context);
+        
+        // Resolve interfaces
+        ArrayList<String> interfaceTypeNames = new ArrayList<String>();
+    	for (int i = 0; i < extendsTypes.size(); i++) {
+    		extendsTypes.set(i, extendsTypes.get(i).resolve(this.context));
+			thisType.checkAccess(line, extendsTypes.get(i));
 
-        thisType.checkAccess(line, superType);
-        if (superType.isFinal()) {
-            JAST.compilationUnit.reportSemanticError(line,
-                    "Cannot extend a final type: %s", superType.toString());
+			if (!extendsTypes.get(i).isInterface())
+	            JAST.compilationUnit.reportSemanticError(line,
+	                    "Extended type is not an interface: %s", extendsTypes.get(i).toString());
         }
 
         CLEmitter partial = new CLEmitter(false);
 
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        partial.addClass(mods, qualifiedName, superType().jvmName(), interfaceTypeNames, false);
 
         for (JMember member : interfaceBlock) {
             member.preAnalyze(this.context, partial);
@@ -162,6 +159,10 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         ArrayList<String> allowedFieldMods = new ArrayList<String>();
         allowedFieldMods.add("public");
         allowedFieldMods.add("static");
+        allowedFieldMods.add("final");
+        ArrayList<String> disallowedMethodMods = new ArrayList<String>();
+        disallowedMethodMods.add("static");
+        disallowedMethodMods.add("final");
         
         for (JMember member : interfaceBlock) {
             if (member instanceof JFieldDeclaration) {
@@ -173,6 +174,15 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
                             "Interface field has illegal modifiers: %s", modsCopy.toString());
                 } else {
                     staticFieldInitializations.add(fieldDecl);
+                }
+            } else if (member instanceof JMethodDeclaration) {
+            	JMethodDeclaration methodDecl = (JMethodDeclaration) member;
+                ArrayList<String> modsCopy = new ArrayList<String>(methodDecl.mods());
+                modsCopy.retainAll(disallowedMethodMods);
+                
+                if (!modsCopy.isEmpty()) {
+                    JAST.compilationUnit.reportSemanticError(line,
+                            "Interface method has illegal modifiers: %s", modsCopy.toString());
                 }
             }
         }
@@ -198,8 +208,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\""
-                + " super=\"%s\">\n", line(), name, superType.toString());
+        p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\">\n", line(), name);
         p.indentRight();
         if (context != null) {
             context.writeToStdOut(p);
@@ -212,6 +221,15 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
             }
             p.indentLeft();
             p.println("</Modifiers>");
+        }
+        if (extendsTypes != null) {
+        	p.println("<ExtendsTypes>");
+            p.indentRight();
+        	for (Type extendsType : extendsTypes) {
+                p.printf("<ExtendsType name=\"%s\"/>\n", extendsType.toString());
+        	}
+            p.indentLeft();
+        	p.println("<ExtendsTypes>");
         }
         if (interfaceBlock != null) {
             p.println("<InterfaceBlock>");

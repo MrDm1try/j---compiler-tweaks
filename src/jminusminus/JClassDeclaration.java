@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -140,9 +141,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         ArrayList<String> interfaceTypeNames = new ArrayList<String>();
-        for (Type implementsType : implementsTypes) {
-        	interfaceTypeNames.add(implementsType.jvmName());
-        }
+    	for (Type implementsType : implementsTypes) {
+    		interfaceTypeNames.add(implementsType.jvmName());
+    	}
         CLEmitter partial = new CLEmitter(false);
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceTypeNames, false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
@@ -164,6 +165,17 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Resolve superclass
         superType = superType.resolve(this.context);
+        
+        // Resolve interfaces
+        ArrayList<String> interfaceTypeNames = new ArrayList<String>();
+    	for (int i = 0; i < implementsTypes.size(); i++) {
+			implementsTypes.set(i, implementsTypes.get(i).resolve(this.context));
+			thisType.checkAccess(line, implementsTypes.get(i));
+
+			if (!implementsTypes.get(i).isInterface())
+	            JAST.compilationUnit.reportSemanticError(line,
+	                    "Implemented type is not an interface: %s", implementsTypes.get(i).toString());
+        }
 
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
@@ -180,7 +192,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfaceTypeNames, false);
 
         // Pre-analyze the members and add them to the partial
         // class

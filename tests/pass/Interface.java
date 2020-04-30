@@ -5,7 +5,11 @@ interface A {
     public int f(int x);
 }
 
-public interface AA {
+interface AA {
+	String s = "s";
+}
+
+public interface AAA extends A, AA {
     public double g(double x) throws Exception;
     public static double z = 5.1;
 }
@@ -16,13 +20,13 @@ class B {
 	}
 }
 
-public class C extends B implements A {
+public class C extends B implements A, AA {
     public int f(int x) {
         return x * x;
     }
 }
 
-public class D implements A, AA {
+public class D implements AAA {
     public int f(int x) {
         return x * x;
     }

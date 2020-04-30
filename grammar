@@ -17,7 +17,7 @@ classDeclaration ::= CLASS IDENTIFIER
                        classBody
 
 interfaceDeclaration ::= INTERFACE IDENTIFIER 
-                       [EXTENDS qualifiedIdentifier] 
+                       [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
                        interfaceBody
 
 classBody ::= LCURLY {modifiers classMemberDecl} RCURLY
