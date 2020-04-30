@@ -1,4 +1,7 @@
+import java.lang.Exception;
+
 interface A {
+	int y = 5;
     public int f(int x);
 }
 

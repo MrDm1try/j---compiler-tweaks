@@ -115,7 +115,7 @@ class JMethodDeclaration extends JAST implements JMember {
 		if (isAbstract && body != null) {
 			JAST.compilationUnit.reportSemanticError(line(), "abstract method cannot have a body");
 		} else if (body == null && !isAbstract) {
-			JAST.compilationUnit.reportSemanticError(line(), "Method with null body must be abstarct");
+			JAST.compilationUnit.reportSemanticError(line(), "Method with null body must be abstract");
 		} else if (isAbstract && isPrivate) {
 			JAST.compilationUnit.reportSemanticError(line(), "private method cannot be declared abstract");
 		} else if (isAbstract && isStatic) {
@@ -195,6 +195,9 @@ class JMethodDeclaration extends JAST implements JMember {
 		} else if (returnType == Type.INT || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
 			partial.addNoArgInstruction(ICONST_0);
 			partial.addNoArgInstruction(IRETURN);
+		} else if (returnType == Type.DOUBLE) {
+			partial.addNoArgInstruction(DCONST_0);
+			partial.addNoArgInstruction(DRETURN);
 		} else {
 			// A reference type.
 			partial.addNoArgInstruction(ACONST_NULL);

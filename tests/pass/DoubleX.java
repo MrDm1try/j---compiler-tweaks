@@ -6,7 +6,12 @@ public class DoubleX {
         double r = 1.0;
         r += r;
         r += 1.2d;
-        double x = 3.14159D * r * r + r - r / r;
+        double x = returnDouble() + 3.14159D * r * r + r - r / r;
         System.out.println(Double.toString(x));
+    }
+    
+    public static double returnDouble() {
+    	double r = 0.7d;
+    	return r;
     }
 }
