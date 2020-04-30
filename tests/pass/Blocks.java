@@ -1,6 +1,8 @@
 public class Blocks {
+	static double x;
+	
     static {
-        double x = 3.14159;
+        x = 3.14159;
     }
 
     {
