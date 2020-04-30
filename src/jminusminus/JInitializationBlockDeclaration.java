@@ -47,7 +47,6 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
      */
 
     public void preAnalyze(Context context, CLEmitter partial) {
-        super.preAnalyze(context, partial);
         if (isPrivate) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Initialization block cannot be declared private");
@@ -73,8 +72,7 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
 
     public JAST analyze(Context context) {
         // Record the defining class declaration.
-        MethodContext methodContext =
-            new MethodContext(context, isStatic, returnType);
+        MethodContext methodContext = new MethodContext(context, isStatic, returnType);
         this.context = methodContext;
 
         if (!isStatic) {
