@@ -10,8 +10,8 @@ public class DoubleX {
         System.out.println(Double.toString(x));
     }
     
-    private static double returnDouble() {
-    	double r = 0.7;
+    public static double returnDouble() {
+    	double r = 0.7d;
     	return r;
     }
 }
