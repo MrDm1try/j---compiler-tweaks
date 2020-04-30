@@ -723,6 +723,9 @@ public class Parser {
 			ArrayList<JFormalParameter> params = formalParameters();
 			ArrayList<Type> throwTypes = throwTypes();
 			mustBe(SEMI);
+			if (!mods.contains("abstract")) {
+				mods.add("abstract");
+			}
 			memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, null);
 		} else {
 			type = type();
@@ -733,9 +736,18 @@ public class Parser {
 				ArrayList<JFormalParameter> params = formalParameters();
 				ArrayList<Type> throwTypes = throwTypes();
 				mustBe(SEMI);
+				if (!mods.contains("abstract")) {
+					mods.add("abstract");
+				}
 				memberDecl = new JMethodDeclaration(line, mods, name, type, throwTypes, params, null);
 			} else {
 				// Field
+				if (!mods.contains("static")) {
+					mods.add("static");
+				}
+				if (!mods.contains("final")) {
+					mods.add("final");
+				}
 				memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
 				mustBe(SEMI);
 			}
