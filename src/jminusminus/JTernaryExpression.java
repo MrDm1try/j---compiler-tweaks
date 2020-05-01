@@ -88,12 +88,15 @@ class JConditionalExpression extends JTernaryExpression {
 	 */
 
 	public JExpression analyze(Context context) {
-		// The condition should be boolean
 		exp1 = (JExpression) exp1.analyze(context);
+		exp2 = (JExpression) exp2.analyze(context);
+		exp3 = (JExpression) exp3.analyze(context);
+		// The condition should be boolean
 		exp1.type().mustMatchExpected(line(), Type.BOOLEAN);
 		
 		// Exp2 and exp3 are branches and should have matching types
-        exp2.type().mustMatchExpected(line(), exp3.type());
+        if (!exp2.type().matchesExpected(exp3.type()) && !exp3.type().matchesExpected(exp2.type()))
+        	 JAST.compilationUnit.reportSemanticError(line(), "If-else expressions should have matching types");
 		
         // The type is determined by the type of the branches
         type = exp2.type();
