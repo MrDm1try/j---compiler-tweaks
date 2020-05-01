@@ -171,8 +171,9 @@ class Method extends Member {
      *            the method we are comparing this to.
      * @return true iff the methods are override-equivalent.
      */
-
-    public boolean equals(Method that) {
+    
+    public boolean equals(Object thatObj) {
+    	Method that = (Method) thatObj;
         return Type.argTypesMatch(this.method.getParameterTypes(), that.method
                 .getParameterTypes());
     }

@@ -117,6 +117,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     	for (int i = 0; i < extendsTypes.size(); i++) {
     		extendsTypes.set(i, extendsTypes.get(i).resolve(this.context));
 			thisType.checkAccess(line, extendsTypes.get(i));
+			interfaceTypeNames.add(extendsTypes.get(i).jvmName());
 
 			if (!extendsTypes.get(i).isInterface())
 	            JAST.compilationUnit.reportSemanticError(line,

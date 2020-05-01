@@ -11,18 +11,28 @@ interface AA {
 
 public interface AAA extends A, AA {
     public double g(double x) throws Exception;
-    public static double z = 5.1;
+    public static double z = y;
 }
 
-class B {
+abstract class B {
+	abstract public String hi();
+}
+
+class BB extends B {
 	public String hi() {
-		return "hi";
+		return "Wello Horld";
 	}
 }
 
 public class C extends B implements A, AA {
+	int a = 1;
+	
+	public String hi() {
+		return "hi";
+	}
+	
     public int f(int x) {
-        return x * x;
+        return x * x + a;
     }
 }
 

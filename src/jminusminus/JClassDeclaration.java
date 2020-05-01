@@ -171,6 +171,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     	for (int i = 0; i < implementsTypes.size(); i++) {
 			implementsTypes.set(i, implementsTypes.get(i).resolve(this.context));
 			thisType.checkAccess(line, implementsTypes.get(i));
+    		interfaceTypeNames.add(implementsTypes.get(i).jvmName());
 
 			if (!implementsTypes.get(i).isInterface())
 	            JAST.compilationUnit.reportSemanticError(line,
@@ -258,6 +259,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                             + "the following abstract methods: %s", methods);
 
         }
+        
         return this;
     }
 

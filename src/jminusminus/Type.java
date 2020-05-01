@@ -5,7 +5,9 @@ package jminusminus;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Hashtable;
 
 /**
@@ -181,6 +183,20 @@ class Type {
     }
 
     /**
+     * Return the Type's direct interface types 
+     * 
+     * @return the interface types.
+     */
+
+    public ArrayList<Type> superInterfaces() {
+        ArrayList<Type> types = new ArrayList<Type>();
+        if (classRep != null)
+        	for (Class<?> interfaceClass : classRep.getInterfaces())
+        		types.add(typeFor(interfaceClass));
+        return types;
+    }
+
+    /**
      * Is this a primitive type?
      * 
      * @return true or false.
@@ -253,6 +269,12 @@ class Type {
     public ArrayList<Method> abstractMethods() {
         ArrayList<Method> inheritedAbstractMethods = superClass() == null ? new ArrayList<Method>()
                 : superClass().abstractMethods();
+        
+        // Add from interfaces
+        for (Type superInterface : superInterfaces()) {
+        	inheritedAbstractMethods.addAll(superInterface.abstractMethods());
+        }
+        
         ArrayList<Method> abstractMethods = new ArrayList<Method>();
         ArrayList<Method> declaredConcreteMethods = declaredConcreteMethods();
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();
@@ -263,6 +285,7 @@ class Type {
                 abstractMethods.add(method);
             }
         }
+        	
         return abstractMethods;
     }
 
@@ -500,10 +523,13 @@ class Type {
         for (int i = 0; i < argTypes.length; i++) {
             classes[i] = argTypes[i].classRep;
         }
-        Class cls = classRep;
 
-        // Search this class and all superclasses
-        while (cls != null) {
+    	Deque<Class<?>> clsStack = new ArrayDeque<Class<?>>();
+    	clsStack.add(classRep);
+        
+        while (!clsStack.isEmpty()) {
+        	Class<?> cls = clsStack.pop();
+
             java.lang.reflect.Method[] methods = cls.getDeclaredMethods();
             for (java.lang.reflect.Method method : methods) {
                 if (method.getName().equals(name)
@@ -512,7 +538,11 @@ class Type {
                     return new Method(method);
                 }
             }
-            cls = cls.getSuperclass();
+            
+            if (cls.getSuperclass() != null)
+            	clsStack.add(cls.getSuperclass());
+            for (Class<?> clsInterface : cls.getInterfaces())
+            	clsStack.add(clsInterface);
         }
         return null;
     }
@@ -554,15 +584,23 @@ class Type {
      */
 
     public Field fieldFor(String name) {
-        Class<?> cls = classRep;
-        while (cls != null) {
+    	Deque<Class<?>> clsStack = new ArrayDeque<Class<?>>();
+    	clsStack.add(classRep);
+        
+        while (!clsStack.isEmpty()) {
+        	Class<?> cls = clsStack.pop();
+        	
             java.lang.reflect.Field[] fields = cls.getDeclaredFields();
             for (java.lang.reflect.Field field : fields) {
                 if (field.getName().equals(name)) {
                     return new Field(field);
                 }
             }
-            cls = cls.getSuperclass();
+            
+            if (cls.getSuperclass() != null)
+            	clsStack.add(cls.getSuperclass());
+            for (Class<?> clsInterface : cls.getInterfaces())
+            	clsStack.add(clsInterface);
         }
         return null;
     }
