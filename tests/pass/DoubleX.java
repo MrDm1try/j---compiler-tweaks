@@ -8,7 +8,7 @@ public class DoubleX {
     }
     
     public static double returnDouble() {
-    	double r = 0.7D;
+    	double r = 7d;
     	return r;
     }
 }

@@ -404,9 +404,10 @@ class Scanner {
 				}
 				return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);				
 			} else {
-				if (ch == 'l' || ch == 'L') {
+				if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
 					// Skip
 					nextCh();
+					return new TokenInfo(DOUBLE_LITERAL, "0", line);	
 				}
 				return new TokenInfo(INT_LITERAL, "0", line);
 			}
@@ -468,6 +469,8 @@ class Scanner {
 			}
 			
 			if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+				// Override
+				kind = DOUBLE_LITERAL;
 				// Skip
 				nextCh();
 			}
