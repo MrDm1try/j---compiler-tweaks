@@ -191,7 +191,7 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
 }
 
 /**
- * The AST node for a logical AND (&&) expression. Implements short-circuiting
+ * The AST node for a logical OR (||) expression. Implements short-circuiting
  * branching.
  */
 
@@ -233,8 +233,6 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
     }
 
     /**
-     * TODO
-     * 
      * @param output
      *            the code emitter (basically an abstraction for producing the
      *            .class file).
@@ -245,7 +243,15 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
      */
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
-    	// TODO
+        if (onTrue) {
+            lhs.codegen(output, targetLabel, true);
+            rhs.codegen(output, targetLabel, true);
+        } else {
+            String falseLabel = output.createLabel();
+            lhs.codegen(output, falseLabel, true);
+            rhs.codegen(output, targetLabel, false);
+            output.addLabel(falseLabel);
+        }
     }
 
 }
