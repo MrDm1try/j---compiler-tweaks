@@ -87,7 +87,7 @@ referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
-forExpression ::= LPAREN [[type] variableDeclarator] SEMI [expression] SEMI [expression] RPAREN // basic for
+forExpression ::= LPAREN [[type] variableDeclarators] SEMI [expression] SEMI [expression {COMMA expression}] RPAREN // basic for
 				| LPAREN formalParameter COLON expression RPAREN // enhanced for loop
 
 expression ::= assignmentExpression | conditionalExpression

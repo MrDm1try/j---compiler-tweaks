@@ -840,7 +840,7 @@ public class Parser {
 			JVariableDeclaration varDecl = null;
 			JFormalParameter variable = null;
 			JExpression exp2 = null;
-			JExpression exp3 = null;
+			ArrayList<JExpression> exps3 = null;
 			mustBe(LPAREN);
 			if (!have(SEMI)) {
 				if (seeForEachExpression()) {
@@ -860,8 +860,12 @@ public class Parser {
 					exp2 = expression();
 					mustBe(SEMI);
 				}
+				exps3 = new ArrayList<JExpression>();
 				if (!see(RPAREN)) {
-					exp3 = expression();
+					exps3.add(expression());					
+					while (have(COMMA))
+						exps3.add(expression());
+						
 				}
 			}
 			mustBe(RPAREN);
@@ -869,9 +873,9 @@ public class Parser {
 			if (variable != null) {
 				return new JForEachStatement(line, variable, exp2, body);
 			} else if (varDecl != null) {
-				return new JForStatement(line, varDecl, exp2, exp3, body);
+				return new JForStatement(line, varDecl, exp2, exps3, body);
 			} else {
-				return new JForStatement(line, initializer, exp2, exp3, body);
+				return new JForStatement(line, initializer, exp2, exps3, body);
 			}
 		} else if (have(TRY)) {
 			// TRY statement {CATCH catchExpression statement} [FINALLY statement]

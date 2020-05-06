@@ -3,6 +3,7 @@
 package jminusminus;
 
 import static jminusminus.CLConstants.*;
+import java.util.ArrayList;
 
 /**
  * The AST node for a for-statement.
@@ -20,8 +21,8 @@ class JForStatement extends JStatement {
 	/** Test expression. */
 	private JExpression termination;
 
-	/** Variable increment expression. */
-	private JExpression increment;
+	/** Variable increment expressions. */
+	private ArrayList<JExpression> incrementList;
 
 	/** The body. */
 	private JStatement body;
@@ -38,25 +39,25 @@ class JForStatement extends JStatement {
 	 * @param body      the body.
 	 */
 
-	public JForStatement(int line, JExpression initializer, JExpression termination, JExpression increment,
+	public JForStatement(int line, JExpression initializer, JExpression termination, ArrayList<JExpression> incrementList,
 			JStatement body) {
 		super(line);
 		this.initializer = initializer;
 		this.varDecl = null;
 		this.analyzedVarDecl = null;
 		this.termination = termination;
-		this.increment = increment;
+		this.incrementList = incrementList;
 		this.body = body;
 	}
 
-	public JForStatement(int line, JVariableDeclaration varDecl, JExpression termination, JExpression increment,
+	public JForStatement(int line, JVariableDeclaration varDecl, JExpression termination, ArrayList<JExpression> incrementList,
 			JStatement body) {
 		super(line);
 		this.initializer = null;
 		this.varDecl = varDecl;
 		this.analyzedVarDecl = null;
 		this.termination = termination;
-		this.increment = increment;
+		this.incrementList = incrementList;
 		this.body = body;
 	}
 
@@ -81,7 +82,8 @@ class JForStatement extends JStatement {
 		termination = termination.analyze(this.context);
 		termination.type().mustMatchExpected(line(), Type.BOOLEAN);
 
-		increment = increment.analyze(this.context);
+		for (int i = 0; i<incrementList.size(); i++)
+			incrementList.set(i, incrementList.get(i).analyze(this.context));
 
 		body = (JStatement) body.analyze(this.context);
 		return this;
@@ -111,7 +113,8 @@ class JForStatement extends JStatement {
 
 		// Codegen body
 		body.codegen(output);
-		increment.codegen(output);
+		for (JExpression increment : incrementList)
+			increment.codegen(output);
 
 		// Unconditional jump back up to test
 		output.addBranchInstruction(GOTO, test);
@@ -132,13 +135,13 @@ class JForStatement extends JStatement {
             context.writeToStdOut(p);
             p.indentLeft();
         }
-		if (varDecl == null) {
+		if (initializer != null) {
 			p.printf("<Initializer>\n");
 			p.indentRight();
 			initializer.writeToStdOut(p);
 			p.indentLeft();
 			p.printf("</Initializer>\n");
-		} else {
+		} else if (varDecl != null) {
 			p.printf("<VarDecl>\n");
 			p.indentRight();
 			varDecl.writeToStdOut(p);
@@ -147,14 +150,17 @@ class JForStatement extends JStatement {
 		}
 		p.printf("<Termination>\n");
 		p.indentRight();
-		termination.writeToStdOut(p);
+		if (termination != null)
+			termination.writeToStdOut(p);
 		p.indentLeft();
 		p.printf("</Termination>\n");
-		p.printf("<Increment>\n");
+		p.printf("<IncrementList>\n");
 		p.indentRight();
-		increment.writeToStdOut(p);
+		for (JExpression increment : incrementList) {
+			increment.writeToStdOut(p);
+		}
 		p.indentLeft();
-		p.printf("</Increment>\n");
+		p.printf("</IncrementList>\n");
 		p.printf("<Body>\n");
 		p.indentRight();
 		body.writeToStdOut(p);

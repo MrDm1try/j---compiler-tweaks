@@ -884,6 +884,7 @@ private JStatement statement(): {
 	JFormalParameter variable = null;
 	JExpression exp2 = null;
 	JExpression exp3 = null;
+	ArrayList<JExpression> exps3 = null;
 	JStatement catchBlock = null;
 	ArrayList<JStatement> catchBlocks = null;
 	JFormalParameter exceptionToCatch = null;
@@ -910,9 +911,7 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
-        <FOR> { line = token.beginLine; }
-        // forExpression ::= LPAREN [[type] variableDeclarator] SEMI [expression] SEMI [expression] RPAREN
-		//				| LPAREN formalParameter COLON expression RPAREN
+        <FOR> { line = token.beginLine; exps3 = new ArrayList<JExpression>(); }
 		<LPAREN>
 		(
 			LOOKAHEAD( formalParameter() <COLON> )
@@ -926,7 +925,8 @@ private JStatement statement(): {
 					LOOKAHEAD( localVariableDeclarationStatement() )
 					varDecl = localVariableDeclarationStatement() |
 					initializer = expression()
-					< SEMI >
+					<SEMI> |
+					<SEMI>
 				)
 				[
 					LOOKAHEAD( expression() )
@@ -936,6 +936,15 @@ private JStatement statement(): {
 				[
 					LOOKAHEAD( expression() )
 					exp3 = expression()
+					{ exps3.add(exp3); }
+					
+					(
+						LOOKAHEAD( <COMMA> expression() )
+						<COMMA>
+						exp3 = expression()
+						{ exps3.add(exp3); }
+					)*
+						
 				]
 			)
 		)
@@ -945,9 +954,9 @@ private JStatement statement(): {
         	if (variable != null) {
 				statement = new JForEachStatement(line, variable, exp2, body);
 			} else if (varDecl != null) {
-				statement = new JForStatement(line, varDecl, exp2, exp3, body);
+				statement = new JForStatement(line, varDecl, exp2, exps3, body);
 			} else {
-				statement = new JForStatement(line, initializer, exp2, exp3, body);
+				statement = new JForStatement(line, initializer, exp2, exps3, body);
 			}
         } |
         <TRY>
