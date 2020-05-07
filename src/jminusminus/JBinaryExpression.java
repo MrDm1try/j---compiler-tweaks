@@ -180,7 +180,7 @@ class JSubtractOp extends JBinaryExpression {
 	public void codegen(CLEmitter output) {
 		lhs.codegen(output);
 		rhs.codegen(output);
-		output.addNoArgInstruction(ISUB);
+		output.addNoArgInstruction(type == Type.DOUBLE ? DSUB : ISUB);
 	}
 
 }

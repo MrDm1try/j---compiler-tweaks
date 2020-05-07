@@ -56,7 +56,7 @@ public class D implements AAA {
     }
     
     public double g(double x) {
-        return x + y;
+        return z + y + x;
     }
  
 }
