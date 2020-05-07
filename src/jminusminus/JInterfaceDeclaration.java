@@ -94,8 +94,11 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     public void declareThisType(Context context) {
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
+        ArrayList<String> interfaceTypeNames = new ArrayList<String>();
+    	for (int i = 0; i < extendsTypes.size(); i++)
+			interfaceTypeNames.add(extendsTypes.get(i).jvmName());
         CLEmitter partial = new CLEmitter(false);
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false); // Object for superClass, just for now
+        partial.addClass(mods, qualifiedName, superType().jvmName(), interfaceTypeNames, false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
     }
@@ -201,7 +204,41 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     public void codegen(CLEmitter output) {
         // The class header
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+
+        ArrayList<String> interfaceTypeNames = new ArrayList<String>();
+    	for (int i = 0; i < extendsTypes.size(); i++)
+			interfaceTypeNames.add(extendsTypes.get(i).jvmName());
+        output.addClass(mods, qualifiedName, superType().jvmName(), interfaceTypeNames, false);
+
+        // The members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).codegen(output);
+        }
+
+        // Generate a class initialization method?
+        if (staticFieldInitializations.size() > 0) {
+            codegenClassInit(output);
+        }
         
+    }
+
+    private void codegenClassInit(CLEmitter output) {
+        ArrayList<String> mods = new ArrayList<String>();
+        mods.add("public");
+        mods.add("static");
+        mods.add("final");
+        output.addMethod(mods, "<clinit>", "()V", null, false);
+
+        // If there are instance initializations, generate code
+        // for them
+        for (JFieldDeclaration staticField : staticFieldInitializations) {
+            staticField.codegenInitializations(output);
+        }
+
+        // Return
+        output.addNoArgInstruction(RETURN);
     }
 
     /**

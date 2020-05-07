@@ -1,4 +1,5 @@
 import java.lang.Exception;
+import java.lang.System;
 
 interface A {
 	double y = 2.0;
@@ -9,26 +10,32 @@ interface AA {
 	String s = "s";
 }
 
-public interface AAA extends A, AA {
+interface AAA extends A, AA {
     public double g(double x) throws Exception;
     public static double z = y;
 }
 
 abstract class B {
 	abstract public String hi();
-}
-
-class BB extends B {
-	public String hi() {
-		return "Wello Horld";
+	
+	public String hi2() {
+		return "hihi";
 	}
 }
 
-public class C extends B implements A, AA {
+class BB extends B {
 	int a = 1;
 	
 	public String hi() {
-		return "hi";
+		return "Wello Horld" + hi2();
+	}
+}
+
+class C extends BB implements A, AA {	
+	public static void main(String[] args) {
+		C c = new C();
+		System.out.println(c.hi());
+		System.out.println(c.f(c.a));
 	}
 	
     public int f(int x) {
@@ -37,12 +44,19 @@ public class C extends B implements A, AA {
 }
 
 public class D implements AAA {
+	
+	public static void main(String[] args) {
+		D d = new D();
+		System.out.println(d.g(2d));
+		System.out.println(D.s);
+	}
+	
     public int f(int x) {
         return x * x;
     }
     
     public double g(double x) {
-        return x + y + z;
+        return x + y;
     }
  
 }

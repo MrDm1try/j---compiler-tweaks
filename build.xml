@@ -181,7 +181,7 @@
                includes="junit/**"
                excludes="junit/JavaCCScannerTest.java,junit/JavaCCParserTest.java,junit/JMinusMinusTestJavaCC.java"
 	       includeantruntime="false"
-	       debug="on">
+	       debug="off">
             <!-- Uncomment the following to see compiler warnings. -->
             <!-- <compilerarg value="-Xlint" />                    -->
             <classpath>
