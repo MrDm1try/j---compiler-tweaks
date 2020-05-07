@@ -283,12 +283,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // The members
+        boolean hasStaticInitBlock = false;
         for (JMember member : classBlock) {
             ((JAST) member).codegen(output);
+            
+            if (member instanceof JInitializationBlockDeclaration && ((JInitializationBlockDeclaration) member).isStatic)
+            	hasStaticInitBlock = true;
         }
 
         // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
+        if (staticFieldInitializations.size() > 0 || hasStaticInitBlock) {
             codegenClassInit(output);
         }
     }
@@ -402,6 +406,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);
+        }
+        
+        for (JMember member : classBlock) {
+        	if (member instanceof JInitializationBlockDeclaration)
+        		((JAST) member).codegen(output);
         }
 
         // Return

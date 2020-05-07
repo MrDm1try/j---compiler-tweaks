@@ -110,7 +110,7 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
      */
 
     public void codegen(CLEmitter output) {
-    	// TODO
+        body.codegen(output);
     }
 
     /**

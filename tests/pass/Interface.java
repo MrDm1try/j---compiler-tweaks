@@ -48,7 +48,7 @@ public class D implements AAA {
 	public static void main(String[] args) {
 		D d = new D();
 		System.out.println(d.g(2d));
-		System.out.println(D.s);
+		System.out.println(s);
 	}
 	
     public int f(int x) {
