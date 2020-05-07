@@ -112,7 +112,14 @@ class JConditionalExpression extends JTernaryExpression {
 	 */
 
 	public void codegen(CLEmitter output) {
-		/* ToDo */
+        String elseLabel = output.createLabel();
+        String endLabel = output.createLabel();
+        exp1.codegen(output, elseLabel, false);
+        exp2.codegen(output);
+		output.addBranchInstruction(GOTO, endLabel);
+        output.addLabel(elseLabel);
+		exp3.codegen(output);
+		output.addLabel(endLabel);
 	}
 
 }
