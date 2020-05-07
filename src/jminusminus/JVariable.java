@@ -81,7 +81,7 @@ class JVariable extends JExpression implements JLhs {
                         .isStatic()
                         || (context.methodContext() != null && context
                                 .methodContext().isStatic()) ? new JVariable(
-                        line(), definingType.toString()) : new JThis(line),
+                        line(), definingType.targetFor(name)) : new JThis(line),
                         name);
                 return (JExpression) newTree.analyze(context);
             }

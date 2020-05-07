@@ -605,6 +605,28 @@ class Type {
         return null;
     }
 
+    public String targetFor(String name) {
+    	Deque<Class<?>> clsStack = new ArrayDeque<Class<?>>();
+    	clsStack.add(classRep);
+        
+        while (!clsStack.isEmpty()) {
+        	Class<?> cls = clsStack.pop();
+        	
+            java.lang.reflect.Field[] fields = cls.getDeclaredFields();
+            for (java.lang.reflect.Field field : fields) {
+                if (field.getName().equals(name)) {
+                    return cls.getName();
+                }
+            }
+            
+            if (cls.getSuperclass() != null)
+            	clsStack.add(cls.getSuperclass());
+            for (Class<?> clsInterface : cls.getInterfaces())
+            	clsStack.add(clsInterface);
+        }
+        return null;
+    }
+
     /**
      * Convert an array of argument types to a string representation of a
      * parenthesized list of the types, eg, (int, boolean, java.lang.String).
