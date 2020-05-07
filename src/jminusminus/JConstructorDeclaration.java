@@ -150,7 +150,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      *            .class file).
      */
 
-    public void codegen(CLEmitter output) {
+    public void codegen(CLEmitter output, ArrayList<JInitializationBlockDeclaration> initBlocks) {
         output.addMethod(mods, "<init>", descriptor, null, false);
         if (!invokesConstructor) {
             output.addNoArgInstruction(ALOAD_0);
@@ -163,9 +163,26 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                 .instanceFieldInitializations()) {
             field.codegenInitializations(output);
         }
+        
+        // Instance initialization blocks
+        for (JInitializationBlockDeclaration initBlock : initBlocks)
+        	initBlock.codegen(output);
+        
         // And then the body
         body.codegen(output);
         output.addNoArgInstruction(RETURN);
+    }
+
+    /**
+     * Generate code for the constructor with initialization blocks.
+     * 
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+
+    public void codegen(CLEmitter output) {
+    	codegen(output, new ArrayList<JInitializationBlockDeclaration>());
     }
 
     /**

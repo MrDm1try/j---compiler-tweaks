@@ -281,14 +281,25 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         if (!hasExplicitConstructor) {
             codegenImplicitConstructor(output);
         }
-
+        
+        // Collect all initilization blocks
+        ArrayList<JInitializationBlockDeclaration> instanceInitializationBlocks = new ArrayList<JInitializationBlockDeclaration>();
+        for (JMember member : classBlock) {
+        	if (member instanceof JInitializationBlockDeclaration) {
+        		instanceInitializationBlocks.add((JInitializationBlockDeclaration) member);
+        	}
+        }
+        
         // The members
         boolean hasStaticInitBlock = false;
-        for (JMember member : classBlock) {
-            ((JAST) member).codegen(output);
-            
+        for (JMember member : classBlock) {            
             if (member instanceof JInitializationBlockDeclaration && ((JInitializationBlockDeclaration) member).isStatic)
             	hasStaticInitBlock = true;
+            
+            if (member instanceof JConstructorDeclaration && instanceInitializationBlocks.size() > 0)
+            	((JConstructorDeclaration) member).codegen(output, instanceInitializationBlocks);
+            else
+                ((JAST) member).codegen(output);
         }
 
         // Generate a class initialization method?
@@ -382,6 +393,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JFieldDeclaration instanceField : instanceFieldInitializations) {
             instanceField.codegenInitializations(output);
         }
+        
+        for (JMember member : classBlock) {
+        	if (member instanceof JInitializationBlockDeclaration && !((JInitializationBlockDeclaration) member).isStatic)
+        		((JAST) member).codegen(output);
+        }
 
         // Return
         output.addNoArgInstruction(RETURN);
@@ -409,7 +425,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
         
         for (JMember member : classBlock) {
-        	if (member instanceof JInitializationBlockDeclaration)
+        	if (member instanceof JInitializationBlockDeclaration && ((JInitializationBlockDeclaration) member).isStatic)
         		((JAST) member).codegen(output);
         }
 
