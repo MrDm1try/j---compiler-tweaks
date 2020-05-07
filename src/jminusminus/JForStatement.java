@@ -73,14 +73,16 @@ class JForStatement extends JStatement {
         // we define a new context for the whole loop
         this.context = new LocalContext(context);
 
-		if (varDecl == null) {
+		if (initializer != null) {
 			initializer = initializer.analyze(this.context);
-		} else {
+		} else if (varDecl != null){
 			analyzedVarDecl = varDecl.analyze(this.context);
 		}
 
-		termination = termination.analyze(this.context);
-		termination.type().mustMatchExpected(line(), Type.BOOLEAN);
+		if (termination != null) {
+			termination = termination.analyze(this.context);
+			termination.type().mustMatchExpected(line(), Type.BOOLEAN);
+		}
 
 		for (int i = 0; i<incrementList.size(); i++)
 			incrementList.set(i, incrementList.get(i).analyze(this.context));
