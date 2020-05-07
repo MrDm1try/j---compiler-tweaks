@@ -119,11 +119,9 @@ class JPlusOp extends JBinaryExpression {
 	 */
 
 	public void codegen(CLEmitter output) {
-		if (type == Type.INT) {
-			lhs.codegen(output);
-			rhs.codegen(output);
-			output.addNoArgInstruction(IADD);
-		}
+		lhs.codegen(output);
+		rhs.codegen(output);
+		output.addNoArgInstruction(type == Type.DOUBLE ? DADD : IADD);
 	}
 
 }
