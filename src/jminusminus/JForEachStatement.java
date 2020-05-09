@@ -4,6 +4,8 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 
+import java.util.ArrayList;
+
 /**
  * The AST node for a for-each-statement.
  */
@@ -51,20 +53,14 @@ class JForEachStatement extends JStatement {
      */
 
     public JForEachStatement analyze(Context context) {
-        // we define a new context for the whole loop
-        this.context = new LocalContext(context);
-
-        // registering the variable in the current context
-		LocalVariableDefn defn = new LocalVariableDefn(variable.type().resolve(this.context), 
-				this.context.nextOffset());
-		defn.initialize();
-		this.context.addEntry(variable.line(), variable.name(), defn);
-
-        variable = (JFormalParameter) variable.analyze(this.context);
-        enumeration = enumeration.analyze(this.context);
-
-        body = (JStatement) body.analyze(this.context);
-        return this;
+        // Convert to for loop
+    	/*ArrayList<String> mods = new ArrayList<String>();
+		ArrayList<JVariableDeclarator> vdecls = new ArrayList<JVariableDeclarator>();
+		vdecls.add(new JVariableDeclarator(line, variable.name(), variable.type(), JExpression initializer)));
+		JVariableDeclaration varDecl = JVariableDeclaration(line, mods, vdecls);
+    	
+    	JForStatement converted = new JForStatement(line, varDecl, termination, incrementList, body);*/
+    	return this;
     }
 
     /**
@@ -76,25 +72,8 @@ class JForEachStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-
-        // starting with the loop-variable
-        variable.codegen(output);
-
-        // Need two labels
-        String test = output.createLabel();
-        String out = output.createLabel();
-
-        output.addLabel(test);
-
-        // Codegen body
-        body.codegen(output);
-        enumeration.codegen(output);
-
-        // Unconditional jump back up to test
-        output.addBranchInstruction(GOTO, test);
-
-        // The label below and outside the loop
-        output.addLabel(out);
+        // Should not be used
+        System.err.println("Error in code generation");
     }
 
     /**

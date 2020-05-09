@@ -14,9 +14,6 @@ class JForStatement extends JStatement {
 	/** Loop variable - only one is used. */
 	private JVariableDeclaration varDecl;
 	private JExpression initializer;
-	
-	/** Used if loop variable was declared in the loop statement. */
-	private JStatement analyzedVarDecl;
 
 	/** Test expression. */
 	private JExpression termination;
@@ -44,7 +41,6 @@ class JForStatement extends JStatement {
 		super(line);
 		this.initializer = initializer;
 		this.varDecl = null;
-		this.analyzedVarDecl = null;
 		this.termination = termination;
 		this.incrementList = incrementList;
 		this.body = body;
@@ -55,7 +51,6 @@ class JForStatement extends JStatement {
 		super(line);
 		this.initializer = null;
 		this.varDecl = varDecl;
-		this.analyzedVarDecl = null;
 		this.termination = termination;
 		this.incrementList = incrementList;
 		this.body = body;
@@ -76,7 +71,7 @@ class JForStatement extends JStatement {
 		if (initializer != null) {
 			initializer = initializer.analyze(this.context);
 		} else if (varDecl != null){
-			analyzedVarDecl = varDecl.analyze(this.context);
+			varDecl = (JVariableDeclaration) varDecl.analyze(this.context);
 		}
 
 		if (termination != null) {
