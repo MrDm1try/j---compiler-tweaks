@@ -99,30 +99,24 @@ class JForStatement extends JStatement {
 	 */
 
 	public void codegen(CLEmitter output) {
-		// TODO fix
+		if (initializer != null) {
+			initializer.codegen(output);
+		} else if (varDecl != null){
+			varDecl.codegen(output);
+		}
 
-		// starting with the loop-variable
-		// variable.codegen(output);
-
-		// Need two labels
-		String test = output.createLabel();
-		String out = output.createLabel();
-
-		// Branch out of the loop on the test condition
-		// being false
-		output.addLabel(test);
-		termination.codegen(output, out, false);
-
-		// Codegen body
-		body.codegen(output);
-		for (JExpression increment : incrementList)
-			increment.codegen(output);
-
-		// Unconditional jump back up to test
-		output.addBranchInstruction(GOTO, test);
-
-		// The label below and outside the loop
-		output.addLabel(out);
+		String repeatLable = output.createLabel();
+		String outLable = output.createLabel();
+		
+		output.addLabel(repeatLable);
+		if (termination != null) {
+			termination.codegen(output, outLable, false);
+		}
+        body.codegen(output);
+		for (JStatement incrementExpr : incrementList)
+			incrementExpr.codegen(output);
+		output.addBranchInstruction(GOTO, repeatLable);
+		output.addLabel(outLable);
 	}
 
 	/**
