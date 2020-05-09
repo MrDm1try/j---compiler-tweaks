@@ -840,7 +840,7 @@ public class Parser {
 			JVariableDeclaration varDecl = null;
 			JFormalParameter variable = null;
 			JExpression exp2 = null;
-			ArrayList<JExpression> exps3 = null;
+			ArrayList<JStatement> exps3 = null;
 			mustBe(LPAREN);
 			if (!have(SEMI)) {
 				if (seeForEachExpression()) {
@@ -860,11 +860,11 @@ public class Parser {
 					exp2 = expression();
 					mustBe(SEMI);
 				}
-				exps3 = new ArrayList<JExpression>();
+				exps3 = new ArrayList<JStatement>();
 				if (!see(RPAREN)) {
-					exps3.add(expression());					
+					exps3.add(statementExpression());					
 					while (have(COMMA))
-						exps3.add(expression());
+						exps3.add(statementExpression());
 						
 				}
 			}
@@ -1212,6 +1212,7 @@ public class Parser {
 		int line = scanner.token().line();
 		JExpression expr = expression();
 		if (expr instanceof JAssignment || expr instanceof JPreIncrementOp || expr instanceof JPostDecrementOp
+				|| expr instanceof JPreDecrementOp || expr instanceof JPostIncrementOp
 				|| expr instanceof JMessageExpression || expr instanceof JSuperConstruction
 				|| expr instanceof JThisConstruction || expr instanceof JNewOp || expr instanceof JNewArrayOp) {
 			// So as not to save on stack

@@ -22,7 +22,7 @@ class JForStatement extends JStatement {
 	private JExpression termination;
 
 	/** Variable increment expressions. */
-	private ArrayList<JExpression> incrementList;
+	private ArrayList<JStatement> incrementList;
 
 	/** The body. */
 	private JStatement body;
@@ -39,7 +39,7 @@ class JForStatement extends JStatement {
 	 * @param body      the body.
 	 */
 
-	public JForStatement(int line, JExpression initializer, JExpression termination, ArrayList<JExpression> incrementList,
+	public JForStatement(int line, JExpression initializer, JExpression termination, ArrayList<JStatement> incrementList,
 			JStatement body) {
 		super(line);
 		this.initializer = initializer;
@@ -50,7 +50,7 @@ class JForStatement extends JStatement {
 		this.body = body;
 	}
 
-	public JForStatement(int line, JVariableDeclaration varDecl, JExpression termination, ArrayList<JExpression> incrementList,
+	public JForStatement(int line, JVariableDeclaration varDecl, JExpression termination, ArrayList<JStatement> incrementList,
 			JStatement body) {
 		super(line);
 		this.initializer = null;
@@ -85,7 +85,7 @@ class JForStatement extends JStatement {
 		}
 
 		for (int i = 0; i<incrementList.size(); i++)
-			incrementList.set(i, incrementList.get(i).analyze(this.context));
+			incrementList.set(i, (JStatement) incrementList.get(i).analyze(this.context));
 
 		body = (JStatement) body.analyze(this.context);
 		return this;
@@ -158,7 +158,7 @@ class JForStatement extends JStatement {
 		p.printf("</Termination>\n");
 		p.printf("<IncrementList>\n");
 		p.indentRight();
-		for (JExpression increment : incrementList) {
+		for (JStatement increment : incrementList) {
 			increment.writeToStdOut(p);
 		}
 		p.indentLeft();
