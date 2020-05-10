@@ -775,6 +775,14 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ): {
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters() 
             throwTypes = throwTypes()
+            {
+				if (!mods.contains("public")) {
+					mods.add("public");
+				}
+				if (!mods.contains("abstract")) {
+					mods.add("abstract");
+				}
+            }
 			<SEMI> 
             { 
                 memberDecl = 
@@ -785,6 +793,17 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ): {
         ( 
             type = type() { line = token.beginLine; }
             variableDeclarators = variableDeclarators( type )
+            {
+				if (!mods.contains("public")) {
+					mods.add("public");
+				}
+				if (!mods.contains("static")) {
+					mods.add("static");
+				}
+				if (!mods.contains("final")) {
+					mods.add("final");
+				}
+            }
             <SEMI>
             { 
                 memberDecl = new JFieldDeclaration( line, mods, 
@@ -883,8 +902,8 @@ private JStatement statement(): {
 	JVariableDeclaration varDecl = null;
 	JFormalParameter variable = null;
 	JExpression exp2 = null;
-	JExpression exp3 = null;
-	ArrayList<JExpression> exps3 = null;
+	JStatement exp3 = null;
+	ArrayList<JStatement> exps3 = null;
 	JStatement catchBlock = null;
 	ArrayList<JStatement> catchBlocks = null;
 	JFormalParameter exceptionToCatch = null;
@@ -911,7 +930,7 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
-        <FOR> { line = token.beginLine; exps3 = new ArrayList<JExpression>(); }
+        <FOR> { line = token.beginLine; exps3 = new ArrayList<JStatement>(); }
 		<LPAREN>
 		(
 			LOOKAHEAD( formalParameter() <COLON> )
@@ -935,13 +954,13 @@ private JStatement statement(): {
 				<SEMI>
 				[
 					LOOKAHEAD( expression() )
-					exp3 = expression()
+					exp3 = statementExpression()
 					{ exps3.add(exp3); }
 					
 					(
-						LOOKAHEAD( <COMMA> expression() )
+						LOOKAHEAD( <COMMA> statementExpression() )
 						<COMMA>
-						exp3 = expression()
+						exp3 = statementExpression()
 						{ exps3.add(exp3); }
 					)*
 						
@@ -1415,6 +1434,8 @@ private JStatement statementExpression(): {
             line = expr.line();
             if ( expr instanceof JAssignment
               || expr instanceof JPreIncrementOp
+              || expr instanceof JPreDecrementOp
+              || expr instanceof JPostIncrementOp
               || expr instanceof JPostDecrementOp
               || expr instanceof JMessageExpression
               || expr instanceof JSuperConstruction
