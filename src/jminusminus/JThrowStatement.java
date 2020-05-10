@@ -35,8 +35,7 @@ class JThrowStatement extends JStatement {
 	 */
 
 	public JStatement analyze(Context context) {
-        MethodContext methodContext = context.methodContext();
-        expr = expr.analyze(methodContext);
+        expr = expr.analyze(context);
         if (!Type.EXCEPTION.isJavaAssignableFrom(expr.type())) {
 			JAST.compilationUnit.reportSemanticError(line(), "Thrown expression is not an exception.");
         }
@@ -44,7 +43,8 @@ class JThrowStatement extends JStatement {
 	}
 
 	public void codegen(CLEmitter output) {
-		// todo
+		expr.codegen(output);
+		output.addNoArgInstruction(ATHROW);
 	}
 
 	/**
