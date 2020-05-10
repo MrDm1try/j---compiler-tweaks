@@ -61,6 +61,12 @@ class Type {
 
     /** The type java.lang.Exception. */
     public static Type EXCEPTION = typeFor(java.lang.Exception.class);
+    
+    /** The type java.lang.Iterable */
+    public static Type ITERABLE = typeFor(java.lang.Iterable.class);
+    
+    /** The type java.util.Iterator */
+    public static Type ITERATOR = typeFor(java.util.Iterator.class);
 
     /** The void type. */
     public final static Type VOID = typeFor(void.class);
@@ -256,6 +262,22 @@ class Type {
 
     public boolean isJavaAssignableFrom(Type that) {
         return this.classRep.isAssignableFrom(that.classRep);
+    }
+    
+    /**
+     * Does this class implement said interface somewhere in the inheritance tree?
+     */
+    public boolean isJavaInterfaceImplemented(Type that) {
+    	for (Type superInterface : superInterfaces()) {
+    		if (superInterface.equals(that))
+    			return true;
+    		else {
+    			if (superInterface.isJavaInterfaceImplemented(that))
+    				return true;
+    		}    			
+    	}
+    	
+    	return superClass().isJavaInterfaceImplemented(that);
     }
 
     /**

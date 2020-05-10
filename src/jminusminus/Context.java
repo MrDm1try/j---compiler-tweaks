@@ -223,6 +223,7 @@ class Context {
  */
 
 class CompilationUnitContext extends Context {
+	protected int generatedVars;
 
     /**
      * Construct a new compilation unit context. There are no surrounding
@@ -232,6 +233,7 @@ class CompilationUnitContext extends Context {
     public CompilationUnitContext() {
         super(null, null, null);
         compilationUnitContext = this;
+        generatedVars = 0;
     }
 
     /**
@@ -254,6 +256,9 @@ class CompilationUnitContext extends Context {
         p.println("</CompilationUnitContext>");
     }
 
+    public String generateVariableName() {
+    	return "#gen"+generatedVars++;
+    }
 }
 
 /**

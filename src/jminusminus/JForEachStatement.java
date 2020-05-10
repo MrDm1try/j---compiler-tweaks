@@ -52,15 +52,93 @@ class JForEachStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JForEachStatement analyze(Context context) {
-        // Convert to for loop
-    	/*ArrayList<String> mods = new ArrayList<String>();
-		ArrayList<JVariableDeclarator> vdecls = new ArrayList<JVariableDeclarator>();
-		vdecls.add(new JVariableDeclarator(line, variable.name(), variable.type(), JExpression initializer)));
-		JVariableDeclaration varDecl = JVariableDeclaration(line, mods, vdecls);
+    public JStatement analyze(Context context) {
+    	this.context = new LocalContext(context);
+        String generatedName = context.compilationUnitContext().generateVariableName();
+        
+        enumeration = (JExpression) enumeration.analyze(this.context);
+        
+        JStatement replacement = null;
+        
+        if (enumeration.type().isArray()) {
+            String generatedName2 = context.compilationUnitContext().generateVariableName();
+            
+        	// Init variable decl
+        	ArrayList<JVariableDeclarator> initDecls = new ArrayList<JVariableDeclarator>();
+        	initDecls.add(new JVariableDeclarator(line, generatedName, Type.INT, new JLiteralInt(line, "0")));
+        	JVariableDeclaration initDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), initDecls);
+        	
+        	// Assign variable to array expression
+        	ArrayList<JVariableDeclarator> arrayDecls = new ArrayList<JVariableDeclarator>();
+        	arrayDecls.add(new JVariableDeclarator(line, generatedName2, enumeration.type(), enumeration));
+        	JVariableDeclaration arrayDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), arrayDecls);
+        	
+        	// Variable object
+        	JVariable loopCountVar = new JVariable(line, generatedName);
+        	JVariable enumerationVar = new JVariable(line, generatedName2);
+        	
+        	// Termination
+        	JExpression termination = new JGreaterThanOp(line, new JFieldSelection(line, enumerationVar, "length"), loopCountVar);
+        	
+        	// Increment 
+        	ArrayList<JStatement> incrementList = new ArrayList<JStatement>();
+        	incrementList.add(new JPostIncrementOp(line, loopCountVar));
+        	((JPostIncrementOp) incrementList.get(0)).isStatementExpression = true;
+        	
+        	// Select current
+        	ArrayList<JVariableDeclarator> nextDecls = new ArrayList<JVariableDeclarator>();
+        	JExpression nextInitializerLhs = new JVariable(line, variable.name());
+        	nextDecls.add(new JVariableDeclarator(line, variable.name(), variable.type(), new JArrayExpression(line, enumerationVar, loopCountVar)));
+        	JVariableDeclaration nextDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), nextDecls);
+        	
+        	// Add to loop body
+        	ArrayList<JStatement> newStatements = new ArrayList<JStatement>();
+        	newStatements.add(nextDeclaration);
+        	if (body instanceof JBlock)
+        		newStatements.addAll(((JBlock) body).statements());
+        	else
+        		newStatements.add(body);        	
+        	JBlock newLoopBody = new JBlock(line, newStatements);
+        	
+        	ArrayList<JStatement> replacementBlockStatements = new ArrayList<JStatement>();
+        	replacementBlockStatements.add(arrayDeclaration);
+        	replacementBlockStatements.add(new JForStatement(line, initDeclaration, termination, incrementList, newLoopBody)); 
+        	
+        	replacement = new JBlock(line, replacementBlockStatements); 
+        } else if (enumeration.type().isJavaInterfaceImplemented(Type.ITERABLE)) {
+        	// Init variable decl
+        	ArrayList<JVariableDeclarator> initDecls = new ArrayList<JVariableDeclarator>();
+        	JMessageExpression iteratorMethod = new JMessageExpression(line, enumeration, "iterator", new ArrayList<JExpression>());
+        	JExpression initializerLhs = new JVariable(line, generatedName);
+        	JExpression initializer = new JAssignOp(line, initializerLhs, iteratorMethod);
+        	initDecls.add(new JVariableDeclarator(line, generatedName, Type.ITERATOR, initializer));
+        	JVariableDeclaration initDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), initDecls);
+        	
+        	// Termination
+        	JExpression termination = new JMessageExpression(line, initializerLhs, "hasNext", new ArrayList<JExpression>());
+        	
+        	// Variable for next
+        	ArrayList<JVariableDeclarator> loopDecls = new ArrayList<JVariableDeclarator>();
+        	JMessageExpression enumerationSelector = new JMessageExpression(line, initializerLhs, "next", new ArrayList<JExpression>());
+        	JExpression variableInitializer = new JAssignOp(line, new JVariable(line, variable.name()), enumerationSelector);
+        	loopDecls.add(new JVariableDeclarator(line, variable.name(), variable.type(), variableInitializer));
+        	JVariableDeclaration loopDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), loopDecls);
+        	
+        	// Add to loop body
+        	ArrayList<JStatement> newStatements = new ArrayList<JStatement>();
+        	newStatements.add(loopDeclaration);
+        	if (body instanceof JBlock)
+        		newStatements.addAll(((JBlock) body).statements());
+        	else
+        		newStatements.add(body);        	
+        	JBlock newBody = new JBlock(line, newStatements);
+        	
+        	replacement = new JForStatement(line, initDeclaration, termination, new ArrayList<JStatement>(), newBody);
+        } else {
+			JAST.compilationUnit.reportSemanticError(line(), "Enumeration is neither an array nor iterable.");
+        }
     	
-    	JForStatement converted = new JForStatement(line, varDecl, termination, incrementList, body);*/
-    	return this;
+    	return (JStatement) replacement.analyze(this.context);
     }
 
     /**
@@ -72,8 +150,7 @@ class JForEachStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        // Should not be used
-        System.err.println("Error in code generation");
+        // Handled elsewhere
     }
 
     /**

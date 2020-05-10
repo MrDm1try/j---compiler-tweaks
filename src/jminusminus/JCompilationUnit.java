@@ -144,6 +144,8 @@ class JCompilationUnit extends JAST {
         // java.lang.String
         context.addType(0, Type.OBJECT);
         context.addType(0, Type.STRING);
+        context.addType(0, Type.ITERABLE);
+        context.addType(0, Type.ITERATOR);
 
         // Declare any imported types
         for (TypeName imported : imports) {
