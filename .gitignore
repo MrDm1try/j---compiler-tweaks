@@ -9,3 +9,4 @@ javadoc/
 src/jminusminus/JavaCCParserTokenManager.java
 src/jminusminus/JavaCCParserConstants.java
 src/jminusminus/JavaCCParser.java
+*.class

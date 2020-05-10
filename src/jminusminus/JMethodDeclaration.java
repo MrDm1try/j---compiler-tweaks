@@ -218,7 +218,11 @@ class JMethodDeclaration extends JAST implements JMember {
 	 */
 
 	public void codegen(CLEmitter output) {
-		output.addMethod(mods, name, descriptor, null, false);
+		ArrayList<String> exceptionNames = new ArrayList<String>();
+		for (Type ex : throwTypes) {
+			exceptionNames.add(ex.jvmName());
+		}
+		output.addMethod(mods, name, descriptor, exceptionNames, false);
 		if (body != null) {
 			body.codegen(output);
 		}
