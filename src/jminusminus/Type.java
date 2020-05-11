@@ -79,11 +79,6 @@ class Type {
      */
     public final static Type CONSTRUCTOR = new Type(null);
 
-    /**
-     * A type marker indicating an initialization block (having no return type).
-     */
-    public final static Type INITIALIZATION_BLOCK = new Type(null);
-
     /** The "any" type (denotes wild expressions). */
     public final static Type ANY = new Type(null);
 

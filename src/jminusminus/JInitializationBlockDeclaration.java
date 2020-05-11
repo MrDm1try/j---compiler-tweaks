@@ -33,7 +33,7 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
     public JInitializationBlockDeclaration(int line, ArrayList<String> mods, JBlock body)
 
     {
-        super(line, mods, null, Type.INITIALIZATION_BLOCK, null, body);
+        super(line, mods, null, Type.VOID, null, body);
     }
 
     /**
