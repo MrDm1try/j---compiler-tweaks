@@ -58,6 +58,10 @@ class JTryCatchFinallyStatement extends JStatement {
      */
 
     public JTryCatchFinallyStatement analyze(Context context) {
+    	if ((exceptionsToCatch.size() == 0) && (finallyBlock == null)) {
+    			JAST.compilationUnit.reportSemanticError(line(), "Encountered 'try' without 'catch' or 'finally' declarations");
+    	}
+    	
         this.offset = ((LocalContext) context).nextOffset();
         this.finallyOffset = ((LocalContext) context).nextOffset();
         tryBlock = (JStatement) tryBlock.analyze(context);
