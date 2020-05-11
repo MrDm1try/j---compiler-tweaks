@@ -25,15 +25,15 @@ classBody ::= LCURLY {modifiers classMemberDecl} RCURLY
 interfaceBody ::= LCURLY {modifiers interfaceMemberDecl} RCURLY
 
 classMemberDecl ::= IDENTIFIER            // constructor
-                 formalParameters throwTypes block
+                 formalParameters [throwTypes] block
              | (VOID | type) IDENTIFIER  // method
-                 formalParameters throwTypes
+                 formalParameters [throwTypes]
                  (block | SEMI)
              | type variableDeclarators SEMI // field
              | block // initializing field
 
 interfaceMemberDecl ::=  (VOID | type) IDENTIFIER  // method
-							 formalParameters throwTypes
+							 formalParameters [throwTypes]
 							 SEMI
                 		 | type variableDeclarators SEMI // field
 
@@ -80,14 +80,15 @@ arguments ::= LPAREN [expression {COMMA expression}] RPAREN
 
 type ::= referenceType | basicType
 
-basicType ::= BOOLEAN | CHAR | INT | BYTE | DOUBLE | FLOAT | LONG | SHORT
+basicType ::= BOOLEAN | CHAR | INT | DOUBLE
 
 referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
-forExpression ::= LPAREN [[type] variableDeclarators] SEMI [expression] SEMI [expression {COMMA expression}] RPAREN // basic for
+forExpression ::= LPAREN seeLocalVariableDeclaration [expression] SEMI [expression {COMMA expression}] RPAREN // basic for
+				| LPAREN [expression] SEMI [expression] SEMI [expression {COMMA expression}] RPAREN // also basic for
 				| LPAREN formalParameter COLON expression RPAREN // enhanced for loop
 
 expression ::= assignmentExpression | conditionalExpression
@@ -95,7 +96,7 @@ expression ::= assignmentExpression | conditionalExpression
 conditionalExpression ::= assignmentExpression TERN assignmentExpression COLON assignmentExpression
 
 assignmentExpression ::= conditionalExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN | AND_ASSIGN | LNOT_ASSIGN | XOR_ASSIGN | OR_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | LRSHIFT_ASIGN ) assignmentExpression]
+                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | REM_ASSIGN) assignmentExpression]
 
 conditionalExpression ::= bitwiseExpressionFour // level 10
                                {LAND | LOR bitwiseExpressionFour}                               
@@ -113,7 +114,7 @@ equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
 
 relationalExpression ::= bitwiseExpressionOne       // level 5
-                           [(GT | LS | GE | LE) bitwiseExpressionOne
+                           [(GT | LE) bitwiseExpressionOne
                            | INSTANCEOF referenceType]
                            
 bitwiseExpressionOne ::= additiveExpression		// level 4
