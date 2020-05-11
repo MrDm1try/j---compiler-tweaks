@@ -898,7 +898,7 @@ private JStatement statement(): {
     JStatement body = null;
     JExpression expr = null;
     Type type = null;
-	JExpression initializer = null;
+	JStatement initializer = null;
 	JVariableDeclaration varDecl = null;
 	JFormalParameter variable = null;
 	JExpression exp2 = null;
@@ -943,7 +943,7 @@ private JStatement statement(): {
 				( 
 					LOOKAHEAD( localVariableDeclarationStatement() )
 					varDecl = localVariableDeclarationStatement() |
-					initializer = expression()
+					initializer = statementExpression()
 					<SEMI> |
 					<SEMI>
 				)
