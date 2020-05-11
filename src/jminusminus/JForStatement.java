@@ -13,7 +13,7 @@ class JForStatement extends JStatement {
 
 	/** Loop variable - only one is used. */
 	private JVariableDeclaration varDecl;
-	private JExpression initializer;
+	private JStatement initializer;
 
 	/** Test expression. */
 	private JExpression termination;
@@ -36,7 +36,7 @@ class JForStatement extends JStatement {
 	 * @param body      the body.
 	 */
 
-	public JForStatement(int line, JExpression initializer, JExpression termination, ArrayList<JStatement> incrementList,
+	public JForStatement(int line, JStatement initializer, JExpression termination, ArrayList<JStatement> incrementList,
 			JStatement body) {
 		super(line);
 		this.initializer = initializer;
@@ -69,7 +69,7 @@ class JForStatement extends JStatement {
         this.context = new LocalContext(context);
 
 		if (initializer != null) {
-			initializer = initializer.analyze(this.context);
+			initializer = (JStatement) initializer.analyze(this.context);
 		} else if (varDecl != null){
 			varDecl = (JVariableDeclaration) varDecl.analyze(this.context);
 		}

@@ -836,7 +836,7 @@ public class Parser {
 			JStatement statement = statement();
 			return new JWhileStatement(line, test, statement);
 		} else if (have(FOR)) {
-			JExpression initializer = null;
+			JStatement initializer = null;
 			JVariableDeclaration varDecl = null;
 			JFormalParameter variable = null;
 			JExpression exp2 = null;
@@ -849,7 +849,7 @@ public class Parser {
 				} else if (seeLocalVariableDeclaration()) {
 					varDecl = localVariableDeclarationStatement();
 				} else {
-					initializer = expression();
+					initializer = statementExpression();
 					mustBe(SEMI);
 				}
 			}

@@ -88,20 +88,6 @@ class JInitializationBlockDeclaration extends JMethodDeclaration implements JMem
     }
 
     /**
-     * TODO
-     * 
-     * @param context
-     *            the parent (class) context.
-     * @param partial
-     *            the code emitter (basically an abstraction for producing the
-     *            partial class).
-     */
-
-    public void partialCodegen(Context context, CLEmitter partial) {
-    	// TODO
-    }
-
-    /**
      * Generate code for the initialization block declaration.
      * 
      * @param output

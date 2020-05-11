@@ -8,7 +8,8 @@ public class ForStatements {
             sum1 += 1;
         }
         for (int i = 6; i <= 8; i++) {
-        	for (int j = 9; j <= 10; j++) {
+        	int j;
+        	for (j = 9; j <= 10; j++) {
                 sum1 += 1;
         	}
     	}
