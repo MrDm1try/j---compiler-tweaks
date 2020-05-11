@@ -87,7 +87,7 @@ referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
-forExpression ::= LPAREN seeLocalVariableDeclaration [expression] SEMI [expression {COMMA expression}] RPAREN // basic for
+forExpression ::= LPAREN localVariableDeclarationStatement [expression] SEMI [expression {COMMA expression}] RPAREN // basic for
 				| LPAREN [expression] SEMI [expression] SEMI [expression {COMMA expression}] RPAREN // also basic for
 				| LPAREN formalParameter COLON expression RPAREN // enhanced for loop
 
