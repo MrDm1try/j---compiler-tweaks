@@ -398,13 +398,13 @@ class Scanner {
 					}
 				} 
 				
-				if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+				if (ch == 'd' || ch == 'D') {
 					// Skip
 					nextCh();
 				}
 				return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);				
 			} else {
-				if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+				if (ch == 'd'|| ch == 'D') {
 					// Skip
 					nextCh();
 					return new TokenInfo(DOUBLE_LITERAL, "0", line);	
@@ -468,7 +468,7 @@ class Scanner {
 				}
 			}
 			
-			if (ch == 'f' || ch == 'd' || ch == 'F' || ch == 'D') {
+			if (ch == 'd' || ch == 'D') {
 				// Override
 				kind = DOUBLE_LITERAL;
 				// Skip
