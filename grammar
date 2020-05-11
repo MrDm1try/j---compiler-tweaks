@@ -25,7 +25,7 @@ classBody ::= LCURLY {modifiers classMemberDecl} RCURLY
 interfaceBody ::= LCURLY {modifiers interfaceMemberDecl} RCURLY
 
 classMemberDecl ::= IDENTIFIER            // constructor
-                 formalParameters block throwTypes
+                 formalParameters throwTypes block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters throwTypes
                  (block | SEMI)
