@@ -379,7 +379,7 @@ class Scanner {
 					nextCh();
 				}
 				
-				if (ch == 'e' || ch == 'e') {
+				if (ch == 'e' || ch == 'E') {
 					buffer.append('e');
 					nextCh();
 					
